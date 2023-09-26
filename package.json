@@ -1,0 +1,25 @@
+{
+  "name": "track",
+  "version": "1.0.0",
+  "description": "An unofficial Amplenote plugin that integrates with Toggl track",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MahmoudFahiem/track.git"
+  },
+  "keywords": [
+    "Amplenote"
+  ],
+  "author": "Mahmoud Fahiem",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MahmoudFahiem/track/issues"
+  },
+  "homepage": "https://github.com/MahmoudFahiem/track#readme",
+  "dependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
