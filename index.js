@@ -67,7 +67,7 @@ const main = {
         Authorization: `Basic ${btoa(this.constants.TOKEN + ":api_token")}`,
       },
     };
-    const res = await this._sendReq(
+    const res = await _sendReq(
       this.URIS.current(this.constants.BASE_URI),
       options
     );
@@ -86,7 +86,7 @@ const main = {
       this.constants.WORKSPACE_ID,
       currentEnryId
     );
-    const res = await this._sendReq(uri, options);
+    const res = await _sendReq(uri, options);
     return await res.json();
   },
   async _startTracking({ description }) {
@@ -109,7 +109,7 @@ const main = {
       this.constants.BASE_URI,
       this.constants.WORKSPACE_ID
     );
-    const entry = await this._sendReq(uri, options);
+    const entry = await _sendReq(uri, options);
     return await entry.json();
   },
 };
