@@ -1,4 +1,5 @@
-// javascript
+import { _sendReq } from "./shared/utils";
+
 const main = {
   constants: {
     BASE_URI: "https://api.track.toggl.com/api/v9",
@@ -110,10 +111,5 @@ const main = {
     );
     const entry = await this._sendReq(uri, options);
     return await entry.json();
-  },
-  async _sendReq(uri, options) {
-    const apiURL = new URL(this.constants.PROXY);
-    apiURL.searchParams.set("apiurl", uri);
-    return await fetch(apiURL, options);
   },
 };
