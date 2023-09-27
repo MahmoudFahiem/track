@@ -1,6 +1,4 @@
-import { constants, URIS } from "../../shared/constants";
-
-export const getCurrent = async () => {
+export const getCurrent = async ({ constants, URIS }) => {
   const options = {
     method: "GET",
     headers: {
@@ -11,7 +9,7 @@ export const getCurrent = async () => {
   return await res.json();
 };
 
-export const stopCurrent = async (currentEntryId) => {
+export const stopCurrent = async ({ currentEntryId, constants, URIS }) => {
   const options = {
     method: "PATCH",
     headers: {
@@ -28,10 +26,14 @@ export const stopCurrent = async (currentEntryId) => {
   return await res.json();
 };
 
-export const stopCurrentEntry = async (app) => {
+export const stopCurrentEntry = async ({ app, constants, URIS }) => {
   try {
-    const currentEntry = await getCurrent();
-    const stoppedEntry = await stopCurrent(currentEntry.id);
+    const currentEntry = await getCurrent({ constants, URIS });
+    const stoppedEntry = await stopCurrent({
+      currentEntryId: currentEntry.id,
+      constants,
+      URIS,
+    });
     app.alert(JSON.stringify(stoppedEntry));
     //app.alert(`"${stoppedEntry.description}" stopped successfully`);
   } catch (e) {

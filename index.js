@@ -26,7 +26,7 @@ const main = {
         return app.context.taskUUID;
       },
       async run(app) {
-        await startTimeEntry(app);
+        await startTimeEntry(app, this.constants, this.URIS);
         return "";
       },
     },
@@ -35,7 +35,7 @@ const main = {
         return app.context.taskUUID;
       },
       async run(app) {
-        await stopCurrentEntry(app);
+        await stopCurrentEntry(app, this.constants, this.URIS);
         return "";
       },
     },

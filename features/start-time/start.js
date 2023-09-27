@@ -19,7 +19,7 @@ export const startTracking = async ({ description, constants, URIS }) => {
   return await entry.json();
 };
 
-export const startTimeEntry = async (app, constants, uris) => {
+export const startTimeEntry = async ({ app, constants, uris } = {}) => {
   try {
     const task = await app.getTask(app.context.taskUUID);
     const entry = await startTracking({
