@@ -19,11 +19,13 @@ export const startTracking = async ({ description, constants, URIS }) => {
   return await entry.json();
 };
 
-export const startTimeEntry = async (app) => {
+export const startTimeEntry = async (app, constants, uris) => {
   try {
     const task = await app.getTask(app.context.taskUUID);
     const entry = await startTracking({
       description: task.content.trim(),
+      constants,
+      uris,
     });
     const entryJSON = JSON.stringify(entry);
     app.alert(`Currently tracking, ${entryJSON}`);
