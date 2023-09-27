@@ -15,7 +15,7 @@ export const startTracking = async ({ description, constants, URIS }) => {
     },
   };
   const uri = URIS.track(constants.BASE_URI, constants.WORKSPACE_ID);
-  const entry = await _sendReq(uri, options);
+  const entry = await sendReq(uri, options);
   return await entry.json();
 };
 
