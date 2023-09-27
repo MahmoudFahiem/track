@@ -27,3 +27,14 @@ export const stopCurrent = async (currentEntryId) => {
   const res = await sendReq(uri, options);
   return await res.json();
 };
+
+export const stopCurrentEntry = async (app) => {
+  try {
+    const currentEntry = await getCurrent();
+    const stoppedEntry = await stopCurrent(currentEntry.id);
+    app.alert(JSON.stringify(stoppedEntry));
+    //app.alert(`"${stoppedEntry.description}" stopped successfully`);
+  } catch (e) {
+    app.alert(e);
+  }
+};

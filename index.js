@@ -1,19 +1,33 @@
 import { startTimeEntry } from "./features/start-time/start";
-import { getCurrent, stopCurrent } from "./features/stop-time/stop";
+import { stopCurrentEntry } from "./features/stop-time/stop";
 
 const main = {
+  constants: {
+    BASE_URI: "https://api.track.toggl.com/api/v9",
+    PROXY: "https://plugins.amplenote.com/cors-proxy",
+    TOKEN: "9dadf2301b6c1cba33e5eb477656d062",
+    PASS: "api_token",
+    WORKSPACE_ID: 4075588,
+  },
+  URIS: {
+    me: (baseUri) => `${baseUri}/me`,
+    entries: (baseUri) => `${baseUri}/me/time_entries`,
+    current: (baseUri) => `${baseUri}/me/time_entries/current`,
+    track: (baseUri, workspaceId) =>
+      `${baseUri}/workspaces/${workspaceId}/time_entries`,
+    projects: (baseUri, workspaceId) =>
+      `${baseUri}/workspaces/${workspaceId}/projects`,
+    stop: (baseUri, workspaceId, entryId) =>
+      `${baseUri}/workspaces/${workspaceId}/time_entries/${entryId}/stop`,
+  },
   insertText: {
     Start: {
       async check(app) {
         return app.context.taskUUID;
       },
       async run(app) {
-        try {
-          await startTimeEntry(app);
-          return "";
-        } catch (e) {
-          app.alert(e);
-        }
+        await startTimeEntry(app);
+        return "";
       },
     },
     Stop: {
@@ -21,15 +35,8 @@ const main = {
         return app.context.taskUUID;
       },
       async run(app) {
-        try {
-          const currentEntry = await getCurrent();
-          const stoppedEntry = await stopCurrent(currentEntry.id);
-          app.alert(JSON.stringify(stoppedEntry));
-          //app.alert(`"${stoppedEntry.description}" stopped successfully`);
-          return "";
-        } catch (e) {
-          app.alert(e);
-        }
+        await stopCurrentEntry(app);
+        return "";
       },
     },
   },

@@ -1,6 +1,4 @@
-import { URIS, constants } from "../../shared/constants";
-
-export const startTracking = async ({ description }) => {
+export const startTracking = async ({ description, constants, URIS }) => {
   const body = {
     created_with: "Amplenote track plugin",
     description,
@@ -24,7 +22,7 @@ export const startTracking = async ({ description }) => {
 export const startTimeEntry = async (app) => {
   try {
     const task = await app.getTask(app.context.taskUUID);
-    const entry = await _startTracking({
+    const entry = await startTracking({
       description: task.content.trim(),
     });
     const entryJSON = JSON.stringify(entry);
