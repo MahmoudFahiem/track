@@ -187,25 +187,27 @@ const main = {
     /**
      * The function `stopCurrentTimeEntry` is used to stop a current time entry by sending a PATCH request
      * to the specified URI with the provided options.
-     * @param currentEntryId{string} - the ID of the time entry that you want to stop.
-     * @param constants{object} - An object containing various constants
-     * @param URIS{object} - URIS is an object that contains different URIs for making API requests.
-     * @returns the stopped time entry.
+     * @param {string} currentEntryId - the ID of the time entry that you want to stop.
+     * @returns {object} the stopped time entry.
      */
     stopCurrentTimeEntry: async function (currentEntryId) {
+      /**
+       * @type {main}
+       */
+      const self = this;
       const options = {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Basic ${btoa(constants.TOKEN + ":api_token")}`,
+          Authorization: `Basic ${btoa(self.constants.TOKEN + ":api_token")}`,
         },
       };
       const uri = this.URIS.stop(
-        this.constants.BASE_URI,
-        this.constants.WORKSPACE_ID,
+        self.constants.BASE_URI,
+        self.constants.WORKSPACE_ID,
         currentEntryId
       );
-      const res = await this._utils.sendRequest.call(this, uri, options);
+      const res = await self._utils.sendRequest.call(self, uri, options);
       return await res.json();
     },
     /**
