@@ -38,13 +38,6 @@ const main = {
       async check(app) {
         return app.context.taskUUID;
       },
-      /**
-       * This function is called by Amplenote when "Stop" option is clicked.
-       *
-       * @param {object} app - The application object that provides access to the app's functionality and
-       * context.
-       * @returns {string} the text to be inserted.
-       */
       async run(app) {
         /**
          * @type {main}
@@ -75,7 +68,9 @@ const main = {
           const stoppedEntry =
             await self._entriesService.stopCurrentTimeEntry.call(
               self,
-              currentEntry.id
+              currentEntry.id,
+              self._utils.getToken(app),
+              self._utils.getWorkspaceId(app)
             );
           app.alert(`"${stoppedEntry.description}" stopped successfully`);
         } catch (e) {
@@ -99,7 +94,8 @@ const main = {
         const entry = await self._entriesService.sendTrackingRequest.call(
           self,
           note.name,
-          self._utils.getToken(app)
+          self._utils.getToken(app),
+          self._utils.getWorkspaceId(app)
         );
         app.alert(`Currently tracking, "${entry.description}"`);
       } catch (e) {
@@ -132,7 +128,8 @@ const main = {
           await self._entriesService.stopCurrentTimeEntry.call(
             self,
             currentEntry.id,
-            self._utils.getToken(app)
+            self._utils.getToken(app),
+            self._utils.getWorkspaceId(app)
           );
         app.alert(`"${stoppedEntry.description}" stopped successfully`);
       } catch (e) {
@@ -166,7 +163,9 @@ const main = {
         );
         const entry = await self._entriesService.sendTrackingRequest.call(
           self,
-          formattedTask
+          formattedTask,
+          self._utils.getToken(app),
+          self._utils.getWorkspaceId(app)
         );
         app.alert(`Currently tracking, "${entry.description}"`);
       } catch (e) {
@@ -237,9 +236,10 @@ const main = {
      * to the specified URI with the provided options.
      * @param {string} currentEntryId - the ID of the time entry that you want to stop.
      * @param {string} token - Toggl Track personal token.
+     * @param {string} workspaceId workspace id
      * @returns {object} the stopped time entry.
      */
-    stopCurrentTimeEntry: async function (currentEntryId, token) {
+    stopCurrentTimeEntry: async function (currentEntryId, token, workspaceId) {
       /**
        * @type {main}
        */
@@ -253,7 +253,7 @@ const main = {
       };
       const uri = self.uris.stop(
         self.constants.BASE_URI,
-        self._utils.getWorkspaceId.call(self, app),
+        workspaceId,
         currentEntryId
       );
       const res = await self._utils.sendRequest.call(self, uri, options);
