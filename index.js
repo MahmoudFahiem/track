@@ -4,7 +4,6 @@ const main = {
   constants: {
     BASE_URI: "https://api.track.toggl.com/api/v9",
     PROXY: "https://plugins.amplenote.com/cors-proxy",
-    TOKEN: "9dadf2301b6c1cba33e5eb477656d062",
     PASS: "api_token",
     WORKSPACE_ID: 4075588,
   },
@@ -99,7 +98,8 @@ const main = {
         });
         const entry = await self._entriesService.sendTrackingRequest.call(
           self,
-          note.name
+          note.name,
+          self._utils.getToken(app)
         );
         app.alert(`Currently tracking, "${entry.description}"`);
       } catch (e) {
@@ -113,7 +113,10 @@ const main = {
       const self = this;
       try {
         const currentEntry =
-          await self._entriesService.getCurrentTimeEntry.call(self);
+          await self._entriesService.getCurrentTimeEntry.call(
+            self,
+            self._utils.getToken(app)
+          );
         if (!currentEntry) return app.alert("There is no running time entry.");
         const currentNote = await self._utils.findNote.call(self, app, {
           uuid: noteUUID,
@@ -128,7 +131,8 @@ const main = {
         const stoppedEntry =
           await self._entriesService.stopCurrentTimeEntry.call(
             self,
-            currentEntry.id
+            currentEntry.id,
+            self._utils.getToken(app)
           );
         app.alert(`"${stoppedEntry.description}" stopped successfully`);
       } catch (e) {
@@ -207,10 +211,10 @@ const main = {
     /**
      * The function `getCurrentTimeEntry` retrieves the current time entry using the provided constants and
      * URIs.
-     *
+     * @param {string} token - Toggl Track personal token.
      * @returns currentEntry object.
      */
-    getCurrentTimeEntry: async function () {
+    getCurrentTimeEntry: async function (token) {
       /**
        * @type {main}
        */
@@ -218,7 +222,7 @@ const main = {
       const options = {
         method: "GET",
         headers: {
-          Authorization: `Basic ${btoa(self.constants.TOKEN + ":api_token")}`,
+          Authorization: `Basic ${btoa(token + ":api_token")}`,
         },
       };
       const res = await self._utils.sendRequest.call(
@@ -232,9 +236,10 @@ const main = {
      * The function `stopCurrentTimeEntry` is used to stop a current time entry by sending a PATCH request
      * to the specified URI with the provided options.
      * @param {string} currentEntryId - the ID of the time entry that you want to stop.
+     * @param {string} token - Toggl Track personal token.
      * @returns {object} the stopped time entry.
      */
-    stopCurrentTimeEntry: async function (currentEntryId) {
+    stopCurrentTimeEntry: async function (currentEntryId, token) {
       /**
        * @type {main}
        */
@@ -243,7 +248,7 @@ const main = {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Basic ${btoa(self.constants.TOKEN + ":api_token")}`,
+          Authorization: `Basic ${btoa(token + ":api_token")}`,
         },
       };
       const uri = self.uris.stop(
@@ -258,10 +263,11 @@ const main = {
      * The function `startTracking` is used to create a new time tracking entry with a given description
      * and other constants.
      * @param description{string} Task description
+     * @param {string} token - Toggl Track personal token.
      * @returns The function `startTracking` is returning the response from the `sendReq` function as a
      * JSON object.
      */
-    sendTrackingRequest: async function (description) {
+    sendTrackingRequest: async function (description, token) {
       /**
        * @type {main}
        */
@@ -278,7 +284,7 @@ const main = {
         body: JSON.stringify(body),
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Basic ${btoa(self.constants.TOKEN + ":api_token")}`,
+          Authorization: `Basic ${btoa(token + ":api_token")}`,
         },
       };
       const uri = self.uris.track(
@@ -351,6 +357,26 @@ const main = {
       const task = await app.getTask(taskUUID);
       if (!task) throw new TypeError("Task not found");
       return task;
+    },
+    /**
+     * A wrapper for app's findNote method that throws error if the note is not found.
+     *
+     * @param {object} app - The application object that provides access to the app's functionality and
+     * context.
+     * @returns {string} The user token.
+     * @throws TypeError if the token is not set.
+     */
+    getToken: function (app) {
+      /**
+       * @type {main}
+       */
+      const self = this;
+      const token = app.settings["Personal Token"];
+      if (!token)
+        throw new TypeError(
+          "Toggl Track's personal token is not configured. Please add it in the plugin's settings."
+        );
+      return token;
     },
   },
 };
