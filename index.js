@@ -44,10 +44,6 @@ const main = {
       },
     },
   },
-  /** App Options */
-  appOption: {
-    Stop: async function (app) {},
-  },
   /** Note Options */
   noteOption: {
     /**
@@ -77,10 +73,11 @@ const main = {
           currentNote.name
         );
         if (!isStopCurrent) return;
-        const stoppedEntry = await self._entriesService.stopCurrentTimeEntry.call(
-          self,
-          currentEntry.id
-        );
+        const stoppedEntry =
+          await self._entriesService.stopCurrentTimeEntry.call(
+            self,
+            currentEntry.id
+          );
         app.alert(`"${stoppedEntry.description}" stopped successfully`);
       } catch (e) {
         app.alert(`stopCurrentEntry: ${e}`);
@@ -88,19 +85,6 @@ const main = {
     },
   },
   _startMain: {
-    /**
-     * This function is used to format a task description.
-     *
-     * @param {string} taskDescription - The task description is a string that represents the description of a task.
-     * @returns {string} - The formatted task description
-     */
-    formatTaskDescription: function (taskDescription) {
-      /**
-       * @type {main}
-       */
-      const self = this;
-      return taskDescription.replaceAll(/{.+/g, "").trim();
-    },
     /**
      * The function `startTimeEntry` starts tracking time for a task and displays an alert with the
      * tracking information.
@@ -116,7 +100,7 @@ const main = {
       try {
         const task = await app.getTask(app.context.taskUUID);
         if (!task) throw new TypeError("Task not found");
-        const formattedTask = self._startMain.formatTaskDescription.call(
+        const formattedTask = self._utils.formatTaskDescription.call(
           self,
           task.content
         );
@@ -277,6 +261,19 @@ const main = {
       const currentNote = await app.findNote(filter);
       if (!currentNote) throw new TypeError("Note is not available.");
       return currentNote;
+    },
+    /**
+     * This function is used to format a task description.
+     *
+     * @param {string} taskDescription - The task description is a string that represents the description of a task.
+     * @returns {string} - The formatted task description
+     */
+    formatTaskDescription: function (taskDescription) {
+      /**
+       * @type {main}
+       */
+      const self = this;
+      return taskDescription.replaceAll(/{.+/g, "").trim();
     },
   },
 };
