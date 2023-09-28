@@ -1,10 +1,10 @@
-// import { startTimeEntry } from "./features/start-time/start";
-// import {
-//   stopCurrentTimeEntry,
-//   getCurrentTimeEntry,
-// } from "./shared/entriesService";
-// import { confirmStopRunningEntry } from "./features/stop-time/stop";
-// import { sendReq, findNote } from "./shared/utils";
+import { startTimeEntry } from "./features/start-time/start";
+import {
+  stopCurrentTimeEntry,
+  getCurrentTimeEntry,
+} from "./shared/entriesService";
+import { confirmStopRunningEntry } from "./features/stop-time/stop";
+import { sendReq, findNote } from "./shared/utils";
 
 const main = {
   /** Constants */
