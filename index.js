@@ -92,7 +92,7 @@ const main = {
      * @param {string} taskDescription - The task description is a string that represents the description of a task.
      * @returns {string} - The formatted task description
      */
-    formatTaskDescription: (taskDescription) => {
+    formatTaskDescription: function (taskDescription) {
       /**
        * @type {main}
        */
@@ -106,7 +106,7 @@ const main = {
      * @param {object} app - The application object that provides access to the app's functionality and
      * context.
      */
-    startTimeEntry: async (app) => {
+    startTimeEntry: async function (app) {
       /**
        * @type {main}
        */
@@ -163,10 +163,10 @@ const main = {
     /**
      * The function `getCurrentTimeEntry` retrieves the current time entry using the provided constants and
      * URIs.
-     * 
+     *
      * @returns currentEntry object.
      */
-    getCurrentTimeEntry: async () => {
+    getCurrentTimeEntry: async function () {
       /**
        * @type {main}
        */
@@ -192,7 +192,7 @@ const main = {
      * @param URIS{object} - URIS is an object that contains different URIs for making API requests.
      * @returns the stopped time entry.
      */
-    stopCurrentTimeEntry: async (currentEntryId) => {
+    stopCurrentTimeEntry: async function (currentEntryId) {
       const options = {
         method: "PATCH",
         headers: {
@@ -215,7 +215,7 @@ const main = {
      * @returns The function `startTracking` is returning the response from the `sendReq` function as a
      * JSON object.
      */
-    sendTrackingRequest: async (description) => {
+    sendTrackingRequest: async function (description) {
       /**
        * @type {main}
        */
@@ -251,7 +251,7 @@ const main = {
      * @param {object} options - The request options.
      * @returns {Promise<Response>} The request response.
      */
-    sendRequest: async (uri, options) => {
+    sendRequest: async function (uri, options) {
       /**
        * @type {main}
        */
@@ -269,7 +269,7 @@ const main = {
      * @returns {Promise<object>} The note option object.
      * @throws TypeError if the note is not found.
      */
-    findNote: async (app, filter) => {
+    findNote: async function (app, filter) {
       const currentNote = await app.findNote(filter);
       if (!currentNote) throw new TypeError("Note is not available.");
       return currentNote;
