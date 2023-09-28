@@ -36,7 +36,7 @@ const sendTrackingRequest = async (description, constants, uris) => {
  * @returns string - The formatted task description
  */
 const formatTaskDescription = (taskDescription) => {
-  return taskDescription.replaceAll(/{Track:.+/g, "").trim();
+  return taskDescription.replaceAll(/{.+/g, "").trim();
 };
 
 /**
