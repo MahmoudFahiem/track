@@ -80,7 +80,7 @@ const main = {
             );
           app.alert(`"${stoppedEntry.description}" stopped successfully`);
         } catch (e) {
-          app.alert(`stopCurrentEntry: ${e}`);
+          app.alert(e);
         }
         return "";
       },
@@ -88,14 +88,24 @@ const main = {
   },
   /** Note Options */
   noteOption: {
-    /**
-     * This function is called by Amplenote when "Stop" option is clicked.
-     *
-     * @param {object} app - The application object that provides access to the app's functionality and
-     * context.
-     * @param {string} noteUUID - A unique identifier for the note.
-     * @returns {Promise<void>}
-     */
+    Start: async function (app, noteUUID) {
+      /**
+       * @type {main}
+       */
+      const self = this;
+      try {
+        const note = await self._utils.findNote.call(self, app, {
+          uuid: noteUUID,
+        });
+        const entry = await self._entriesService.sendTrackingRequest.call(
+          self,
+          note.name
+        );
+        app.alert(`Currently tracking, "${entry.description}"`);
+      } catch (e) {
+        app.alert(e);
+      }
+    },
     Stop: async function (app, noteUUID) {
       /**
        * @type {main}
@@ -122,10 +132,11 @@ const main = {
           );
         app.alert(`"${stoppedEntry.description}" stopped successfully`);
       } catch (e) {
-        app.alert(`stopCurrentEntry: ${e}`);
+        app.alert(e);
       }
     },
   },
+  /** Start Time Feature */
   _startMain: {
     /**
      * The function `startTimeEntry` starts tracking time for a task and displays an alert with the
@@ -159,6 +170,7 @@ const main = {
       }
     },
   },
+  /** Stop Time Feature */
   _stopMain: {
     /**
      * The function `confirmStopRunningEntry` checks if the current entry description matches the current
@@ -190,6 +202,7 @@ const main = {
       return value;
     },
   },
+  /** Time Entries Service */
   _entriesService: {
     /**
      * The function `getCurrentTimeEntry` retrieves the current time entry using the provided constants and
@@ -276,6 +289,7 @@ const main = {
       return await entry.json();
     },
   },
+  /** General Utils */
   _utils: {
     /**
      * This function is used to send a request thought Amplenote proxy.
