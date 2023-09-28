@@ -381,7 +381,7 @@ const main = {
      *
      * @param {object} app - The application object that provides access to the app's functionality and
      * context.
-     * @returns {string} The workspace id.
+     * @returns {number} The workspace id.
      * @throws TypeError if the token is not set.
      */
     getWorkspaceId: function (app) {
@@ -394,7 +394,10 @@ const main = {
         throw new TypeError(
           "Workspace id is not configured. Please add it in the plugin's settings."
         );
-      return workspaceId;
+      const workspaceIdNumber = parseInt(workspaceId);
+      if (isNaN(workspaceId))
+        throw new TypeError("Workspace id is not a valid number.");
+      return workspaceIdNumber;
     },
   },
 };
