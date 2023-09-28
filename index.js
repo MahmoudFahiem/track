@@ -39,11 +39,7 @@ const main = {
         return app.context.taskUUID;
       },
       async run(app) {
-        await stopCurrentEntry({
-          app,
-          constants: this.constants,
-          uris: this.URIS,
-        });
+        await stopCurrentEntry(app, this.constants, this.URIS);
         return "";
       },
     },
