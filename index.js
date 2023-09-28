@@ -31,7 +31,7 @@ const main = {
          * @type {main}
          */
         const self = this;
-        await self._startMain.startTimeEntry.call(this, app);
+        await self._startMain.startTimeEntry.call(self, app);
         return "";
       },
     },
@@ -39,7 +39,48 @@ const main = {
       async check(app) {
         return app.context.taskUUID;
       },
+      /**
+       * This function is called by Amplenote when "Stop" option is clicked.
+       *
+       * @param {object} app - The application object that provides access to the app's functionality and
+       * context.
+       * @returns {string} the text to be inserted.
+       */
       async run(app) {
+        /**
+         * @type {main}
+         */
+        const self = this;
+        try {
+          const currentEntry =
+            await self._entriesService.getCurrentTimeEntry.call(self);
+          if (!currentEntry)
+            return app.alert("There is no running time entry.");
+          const task = await self._utils.getTask.call(
+            self,
+            app.context.taskUUID
+          );
+          const formattedTask = self._utils.formatTaskDescription.call(
+            self,
+            task.content
+          );
+          const isStopCurrent =
+            await self._stopMain.confirmStopRunningEntry.call(
+              self,
+              app,
+              currentEntry.description,
+              formattedTask
+            );
+          if (!isStopCurrent) return;
+          const stoppedEntry =
+            await self._entriesService.stopCurrentTimeEntry.call(
+              self,
+              currentEntry.id
+            );
+          app.alert(`"${stoppedEntry.description}" stopped successfully`);
+        } catch (e) {
+          app.alert(`stopCurrentEntry: ${e}`);
+        }
         return "";
       },
     },
@@ -52,7 +93,7 @@ const main = {
      * @param {object} app - The application object that provides access to the app's functionality and
      * context.
      * @param {string} noteUUID - A unique identifier for the note.
-     * @returns {void}
+     * @returns {Promise<void>}
      */
     Stop: async function (app, noteUUID) {
       /**
@@ -98,8 +139,7 @@ const main = {
        */
       const self = this;
       try {
-        const task = await app.getTask(app.context.taskUUID);
-        if (!task) throw new TypeError("Task not found");
+        const task = await self._utils.getTask.call(self, app.context.taskUUID);
         const formattedTask = self._utils.formatTaskDescription.call(
           self,
           task.content
@@ -122,15 +162,15 @@ const main = {
      * @param {object} app - The application object that provides access to the app's functionality and
      * context.
      * @param {string} currentEntryDescription - The description of the current running entry.
-     * @param {string} currentNoteName - The name of the current note or entry.
+     * @param {string} currentTaskName - The name of the current note or task.
      * @returns {Promise<boolean>} The function `confirmStopRunningEntry` returns a boolean value.
      */
     confirmStopRunningEntry: async (
       app,
       currentEntryDescription,
-      currentNoteName
+      currentTaskName
     ) => {
-      if (currentEntryDescription === currentNoteName) return true;
+      if (currentEntryDescription === currentTaskName) return true;
       const value = await app.prompt(
         `Current running entry: "${currentEntryDescription}"`,
         {
@@ -254,7 +294,7 @@ const main = {
      * @param {object} app - The application object that provides access to the app's functionality and
      * context.
      * @param {object} filter - A filter object that filters the notes.
-     * @returns {Promise<object>} The note option object.
+     * @returns {Promise<object>} The note object.
      * @throws TypeError if the note is not found.
      */
     findNote: async function (app, filter) {
@@ -274,6 +314,24 @@ const main = {
        */
       const self = this;
       return taskDescription.replaceAll(/{.+/g, "").trim();
+    },
+    /**
+     * A wrapper for app's findNote method that throws error if the note is not found.
+     *
+     * @param {object} app - The application object that provides access to the app's functionality and
+     * context.
+     * @param {string} taskUUID - A unique identifier for the task.
+     * @returns {Promise<object>} The task object.
+     * @throws TypeError if the note is not found.
+     */
+    getTask: async function (app, taskUUID) {
+      /**
+       * @type {main}
+       */
+      const self = this;
+      const task = await app.getTask(taskUUID);
+      if (!task) throw new TypeError("Task not found");
+      return task;
     },
   },
 };
