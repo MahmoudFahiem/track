@@ -67,7 +67,9 @@ const main = {
         const currentEntry =
           await self._entriesService.getCurrentTimeEntry.call(self);
         if (!currentEntry) return app.alert("There is no running time entry.");
-        const currentNote = await self._utils.findNote(app, { uuid: noteUUID });
+        const currentNote = await self._utils.findNote.call(self, app, {
+          uuid: noteUUID,
+        });
         const isStopCurrent = await self._stopMain.confirmStopRunningEntry.call(
           self,
           app,
@@ -75,7 +77,7 @@ const main = {
           currentNote.name
         );
         if (!isStopCurrent) return;
-        const stoppedEntry = await self._stopMain.stopCurrentTimeEntry.call(
+        const stoppedEntry = await self._entriesService.stopCurrentTimeEntry.call(
           self,
           currentEntry.id
         );
@@ -179,7 +181,7 @@ const main = {
       };
       const res = await self._utils.sendRequest.call(
         self,
-        self.uris.current(this.constants.BASE_URI),
+        self.uris.current(self.constants.BASE_URI),
         options
       );
       return await res.json();
@@ -202,7 +204,7 @@ const main = {
           Authorization: `Basic ${btoa(self.constants.TOKEN + ":api_token")}`,
         },
       };
-      const uri = this.URIS.stop(
+      const uri = self.uris.stop(
         self.constants.BASE_URI,
         self.constants.WORKSPACE_ID,
         currentEntryId
