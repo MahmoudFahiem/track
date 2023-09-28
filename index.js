@@ -1,3 +1,4 @@
+// Javascript updated 9/28/2023, 8:14:20 PM by Amplenote Plugin Builder from source code within "https://github.com/MahmoudFahiem/track"
 const main = {
   /** Constants */
   constants: {
@@ -8,7 +9,7 @@ const main = {
     WORKSPACE_ID: 4075588,
   },
   /** URIS */
-  URIS: {
+  uris: {
     me: (baseUri) => `${baseUri}/me`,
     entries: (baseUri) => `${baseUri}/me/time_entries`,
     current: (baseUri) => `${baseUri}/me/time_entries/current`,
@@ -26,46 +27,57 @@ const main = {
         return app.context.taskUUID;
       },
       async run(app) {
-        await this._startMain.startTimeEntry(app, this.constants, this.URIS);
+        /**
+         * @type {main}
+         */
+        const self = this;
+        await self._startMain.startTimeEntry.call(this, app);
         return "";
       },
     },
-    // Stop: {
-    //   async check(app) {
-    //     return app.context.taskUUID;
-    //   },
-    //   async run(app) {
-    //     await stopCurrentEntry(app, this.constants, this.URIS);
-    //     return "";
-    //   },
-    // },
+    Stop: {
+      async check(app) {
+        return app.context.taskUUID;
+      },
+      async run(app) {
+        return "";
+      },
+    },
   },
   /** App Options */
   appOption: {
-    // Stop: async function (app) {
-    //   await stopCurrentEntry(app, this.constants, this.URIS);
-    // },
+    Stop: async function (app) {},
   },
   /** Note Options */
   noteOption: {
+    /**
+     * This function is called by Amplenote when "Stop" option is clicked.
+     *
+     * @param {object} app - The application object that provides access to the app's functionality and
+     * context.
+     * @param {string} noteUUID - A unique identifier for the note.
+     * @returns {void}
+     */
     Stop: async function (app, noteUUID) {
+      /**
+       * @type {main}
+       */
+      const self = this;
       try {
-        const currentEntry = await this._stopMain.getCurrentTimeEntry(
-          constants,
-          uris
-        );
+        const currentEntry =
+          await self._entriesService.getCurrentTimeEntry.call(self);
         if (!currentEntry) return app.alert("There is no running time entry.");
-        const currentNote = await this._utils.findNote(app, { uuid: noteUUID });
-        const isStopCurrent = await this._stopMain.confirmStopRunningEntry(
+        const currentNote = await self._utils.findNote(app, { uuid: noteUUID });
+        const isStopCurrent = await self._stopMain.confirmStopRunningEntry.call(
+          self,
           app,
           currentEntry.description,
           currentNote.name
         );
         if (!isStopCurrent) return;
-        const stoppedEntry = await this._stopMain.stopCurrentTimeEntry(
-          currentEntry.id,
-          constants,
-          uris
+        const stoppedEntry = await self._stopMain.stopCurrentTimeEntry.call(
+          self,
+          currentEntry.id
         );
         app.alert(`"${stoppedEntry.description}" stopped successfully`);
       } catch (e) {
@@ -75,29 +87,41 @@ const main = {
   },
   _startMain: {
     /**
-     * The function formatTaskDescription is used to format a task description.
-     * @param taskDescription - The task description is a string that represents the description of a task.
-     * @returns string - The formatted task description
+     * This function is used to format a task description.
+     *
+     * @param {string} taskDescription - The task description is a string that represents the description of a task.
+     * @returns {string} - The formatted task description
      */
     formatTaskDescription: (taskDescription) => {
+      /**
+       * @type {main}
+       */
+      const self = this;
       return taskDescription.replaceAll(/{.+/g, "").trim();
     },
     /**
      * The function `startTimeEntry` starts tracking time for a task and displays an alert with the
      * tracking information.
+     *
      * @param {object} app - The application object that provides access to the app's functionality and
      * context.
-     * @param {object} constants - Constants object
-     * @param {object} uris - URIS object
      */
-    startTimeEntry: async (app, constants, uris) => {
+    startTimeEntry: async (app) => {
+      /**
+       * @type {main}
+       */
+      const self = this;
       try {
         const task = await app.getTask(app.context.taskUUID);
         if (!task) throw new TypeError("Task not found");
-        const formattedTask = this._startMain.formatTaskDescription(
+        const formattedTask = self._startMain.formatTaskDescription.call(
+          self,
           task.content
         );
-        const entry = await sendTrackingRequest(formattedTask, constants, uris);
+        const entry = await self._entriesService.sendTrackingRequest.call(
+          self,
+          formattedTask
+        );
         app.alert(`Currently tracking, "${entry.description}"`);
       } catch (e) {
         app.alert(`startTimeEntry: ${e}`);
@@ -109,12 +133,11 @@ const main = {
      * The function `confirmStopRunningEntry` checks if the current entry description matches the current
      * note name and prompts the user to confirm if they want to stop the running entry.
      *
-     * @param app{Object} - The application object that provides access to the app's functionality and
+     * @param {object} app - The application object that provides access to the app's functionality and
      * context.
-     * @param app.prompt{callable} - Prompt the user
-     * @param currentEntryDescription{string} - The description of the current running entry.
-     * @param currentNoteName{string} - The name of the current note or entry.
-     * @returns{Promise<boolean>} The function `confirmStopRunningEntry` returns a boolean value.
+     * @param {string} currentEntryDescription - The description of the current running entry.
+     * @param {string} currentNoteName - The name of the current note or entry.
+     * @returns {Promise<boolean>} The function `confirmStopRunningEntry` returns a boolean value.
      */
     confirmStopRunningEntry: async (
       app,
@@ -140,18 +163,25 @@ const main = {
     /**
      * The function `getCurrentTimeEntry` retrieves the current time entry using the provided constants and
      * URIs.
-     * @param constants{object} Constants object
-     * @param uris{object} URIS object
-     * @returns The function `getCurrentTimeEntry` is returning the result of calling `res.json()`.
+     * 
+     * @returns currentEntry object.
      */
-    getCurrentTimeEntry: async (constants, URIS) => {
+    getCurrentTimeEntry: async () => {
+      /**
+       * @type {main}
+       */
+      const self = this;
       const options = {
         method: "GET",
         headers: {
-          Authorization: `Basic ${btoa(constants.TOKEN + ":api_token")}`,
+          Authorization: `Basic ${btoa(self.constants.TOKEN + ":api_token")}`,
         },
       };
-      const res = await sendReq(URIS.current(constants.BASE_URI), options);
+      const res = await self._utils.sendRequest.call(
+        self,
+        self.uris.current(this.constants.BASE_URI),
+        options
+      );
       return await res.json();
     },
     /**
@@ -162,7 +192,7 @@ const main = {
      * @param URIS{object} - URIS is an object that contains different URIs for making API requests.
      * @returns the stopped time entry.
      */
-    stopCurrentTimeEntry: async (currentEntryId, constants, URIS) => {
+    stopCurrentTimeEntry: async (currentEntryId) => {
       const options = {
         method: "PATCH",
         headers: {
@@ -170,41 +200,46 @@ const main = {
           Authorization: `Basic ${btoa(constants.TOKEN + ":api_token")}`,
         },
       };
-      const uri = URIS.stop(
-        constants.BASE_URI,
-        constants.WORKSPACE_ID,
+      const uri = this.URIS.stop(
+        this.constants.BASE_URI,
+        this.constants.WORKSPACE_ID,
         currentEntryId
       );
-      const res = await sendReq(uri, options);
+      const res = await this._utils.sendRequest.call(this, uri, options);
       return await res.json();
     },
     /**
      * The function `startTracking` is used to create a new time tracking entry with a given description
      * and other constants.
      * @param description{string} Task description
-     * @param constants{object} Constants object
-     * @param uris{object} URIS object
      * @returns The function `startTracking` is returning the response from the `sendReq` function as a
      * JSON object.
      */
-    sendTrackingRequest: async (description, constants, uris) => {
+    sendTrackingRequest: async (description) => {
+      /**
+       * @type {main}
+       */
+      const self = this;
       const body = {
         created_with: "Amplenote track plugin",
         description,
         duration: -1,
         start: new Date().toISOString(),
-        workspace_id: constants.WORKSPACE_ID,
+        workspace_id: self.constants.WORKSPACE_ID,
       };
       const options = {
         method: "POST",
         body: JSON.stringify(body),
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Basic ${btoa(constants.TOKEN + ":api_token")}`,
+          Authorization: `Basic ${btoa(self.constants.TOKEN + ":api_token")}`,
         },
       };
-      const uri = uris.track(constants.BASE_URI, constants.WORKSPACE_ID);
-      const entry = await sendReq(uri, options);
+      const uri = self.uris.track(
+        self.constants.BASE_URI,
+        self.constants.WORKSPACE_ID
+      );
+      const entry = await self._utils.sendRequest.call(self, uri, options);
       return await entry.json();
     },
   },
@@ -217,7 +252,11 @@ const main = {
      * @returns {Promise<Response>} The request response.
      */
     sendRequest: async (uri, options) => {
-      const apiURL = new URL(this.constants.PROXY);
+      /**
+       * @type {main}
+       */
+      const self = this;
+      const apiURL = new URL(self.constants.PROXY);
       apiURL.searchParams.set("apiurl", uri);
       return await fetch(apiURL, options);
     },
@@ -227,7 +266,7 @@ const main = {
      * @param {object} app - The application object that provides access to the app's functionality and
      * context.
      * @param {object} filter - A filter object that filters the notes.
-     * @returns {object} The note option object.
+     * @returns {Promise<object>} The note option object.
      * @throws TypeError if the note is not found.
      */
     findNote: async (app, filter) => {
