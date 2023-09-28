@@ -50,4 +50,10 @@ const main = {
       await stopCurrentEntry(app, this.constants, this.URIS);
     },
   },
+  /** Note Options */
+  noteOption: {
+    Stop: async function (app) {
+      await stopCurrentEntry(app, this.constants, this.URIS);
+    },
+  },
 };
