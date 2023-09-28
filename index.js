@@ -46,7 +46,7 @@ const main = {
   },
   /** App Options */
   appOption: {
-    Stop: async (app) => {
+    Stop: async function (app) {
       await stopCurrentEntry(app, this.constants, this.URIS);
     },
   },
