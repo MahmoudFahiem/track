@@ -59,8 +59,7 @@ export const stopCurrentEntry = async (app, constants, uris) => {
       constants,
       uris
     );
-    app.alert(JSON.stringify(stoppedEntry));
-    //app.alert(`"${stoppedEntry.description}" stopped successfully`);
+    app.alert(`"${stoppedEntry.description}" stopped successfully`);
   } catch (e) {
     app.alert(e);
   }
