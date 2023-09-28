@@ -1,5 +1,6 @@
 import { startTimeEntry } from "./features/start-time/start";
 import { stopCurrentEntry } from "./features/stop-time/stop";
+import { sendReq } from "./shared/utils";
 
 const main = {
   /** Constants */
