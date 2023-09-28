@@ -1,7 +1,11 @@
-import { startTimeEntry } from "./features/start-time/start";
+import {
+  startTimeEntry,
+  formatTaskDescription,
+} from "./features/start-time/start";
 import {
   stopCurrentTimeEntry,
   getCurrentTimeEntry,
+  sendTrackingRequest,
 } from "./shared/entriesService";
 import { confirmStopRunningEntry } from "./features/stop-time/stop";
 import { sendReq, findNote } from "./shared/utils";

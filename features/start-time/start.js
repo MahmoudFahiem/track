@@ -1,41 +1,11 @@
-import { sendReq } from "../../shared/utils";
-
-/**
- * The function `startTracking` is used to create a new time tracking entry with a given description
- * and other constants.
- * @param description{string} Task description
- * @param constants{object} Constants object
- * @param uris{object} URIS object
- * @returns The function `startTracking` is returning the response from the `sendReq` function as a
- * JSON object.
- */
-const sendTrackingRequest = async (description, constants, uris) => {
-  const body = {
-    created_with: "Amplenote track plugin",
-    description,
-    duration: -1,
-    start: new Date().toISOString(),
-    workspace_id: constants.WORKSPACE_ID,
-  };
-  const options = {
-    method: "POST",
-    body: JSON.stringify(body),
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Basic ${btoa(constants.TOKEN + ":api_token")}`,
-    },
-  };
-  const uri = uris.track(constants.BASE_URI, constants.WORKSPACE_ID);
-  const entry = await sendReq(uri, options);
-  return await entry.json();
-};
+import { sendTrackingRequest } from "../../shared/entriesService";
 
 /**
  * The function formatTaskDescription is used to format a task description.
  * @param taskDescription - The task description is a string that represents the description of a task.
  * @returns string - The formatted task description
  */
-const formatTaskDescription = (taskDescription) => {
+export const formatTaskDescription = (taskDescription) => {
   return taskDescription.replaceAll(/{.+/g, "").trim();
 };
 
