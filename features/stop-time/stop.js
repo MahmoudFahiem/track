@@ -62,6 +62,6 @@ export const stopCurrentEntry = async (app, constants, uris) => {
     );
     app.alert(`"${stoppedEntry.description}" stopped successfully`);
   } catch (e) {
-    app.alert(e);
+    app.alert(`stopCurrentEntry: ${e}`);
   }
 };

@@ -9,7 +9,7 @@ import { sendReq } from "../../shared/utils";
  * @returns The function `startTracking` is returning the response from the `sendReq` function as a
  * JSON object.
  */
-export const startTracking = async (description, constants, uris) => {
+const sendTrackingRequest = async (description, constants, uris) => {
   const body = {
     created_with: "Amplenote track plugin",
     description,
@@ -31,6 +31,15 @@ export const startTracking = async (description, constants, uris) => {
 };
 
 /**
+ * The function formatTaskDescription is used to format a task description.
+ * @param taskDescription - The task description is a string that represents the description of a task.
+ * @returns string - The formatted task description
+ */
+const formatTaskDescription = (taskDescription) => {
+  return taskDescription.replaceAll(/{Track:.+/g, "").trim();
+};
+
+/**
  * The function `startTimeEntry` starts tracking time for a task and displays an alert with the
  * tracking information.
  * @param app{object} - The application object that provides access to the app's functionality and
@@ -42,10 +51,10 @@ export const startTimeEntry = async (app, constants, uris) => {
   try {
     const task = await app.getTask(app.context.taskUUID);
     if (!task) throw new TypeError("Task not found");
-    const entry = await startTracking(task.content.trim(), constants, uris);
-    const entryJSON = JSON.stringify(entry);
-    app.alert(`Currently tracking, ${entryJSON}`);
+    const formattedTask = formatTaskDescription(task.content);
+    const entry = await sendTrackingRequest(formattedTask, constants, uris);
+    app.alert(`Currently tracking, "${entry.description}"`);
   } catch (e) {
-    app.alert(e);
+    app.alert(`startTimeEntry: ${e}`);
   }
 };
