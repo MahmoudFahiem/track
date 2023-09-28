@@ -29,11 +29,7 @@ const main = {
         return app.context.taskUUID;
       },
       async run(app) {
-        await startTimeEntry({
-          app,
-          constants: this.constants,
-          uris: this.URIS,
-        });
+        await startTimeEntry(app, this.constants, this.URIS);
         return "";
       },
     },
