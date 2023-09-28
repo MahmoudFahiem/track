@@ -69,7 +69,7 @@ const main = {
             await self._stopMain.confirmStopRunningEntry.call(
               self,
               app,
-              currentEntry.description,
+              currentEntry.description.trim(),
               formattedTask
             );
           if (!isStopCurrent) return;
