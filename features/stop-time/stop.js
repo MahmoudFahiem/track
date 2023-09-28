@@ -1,67 +1,30 @@
-import { sendReq } from "../../shared/utils";
-
 /**
- * The function `getCurrentTimeEntry` retrieves the current time entry using the provided constants and
- * URIs.
- * @param constants{object} Constants object
- * @param uris{object} URIS object
- * @returns The function `getCurrentTimeEntry` is returning the result of calling `res.json()`.
- */
-const getCurrentTimeEntry = async (constants, URIS) => {
-  const options = {
-    method: "GET",
-    headers: {
-      Authorization: `Basic ${btoa(constants.TOKEN + ":api_token")}`,
-    },
-  };
-  const res = await sendReq(URIS.current(constants.BASE_URI), options);
-  return await res.json();
-};
-
-/**
- * The function `stopCurrentTimeEntry` is used to stop a current time entry by sending a PATCH request
- * to the specified URI with the provided options.
- * @param currentEntryId{string} - the ID of the time entry that you want to stop.
- * @param constants{object} - An object containing various constants
- * @param URIS{object} - URIS is an object that contains different URIs for making API requests.
- * @returns the stopped time entry.
- */
-const stopCurrentTimeEntry = async (currentEntryId, constants, URIS) => {
-  const options = {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Basic ${btoa(constants.TOKEN + ":api_token")}`,
-    },
-  };
-  const uri = URIS.stop(
-    constants.BASE_URI,
-    constants.WORKSPACE_ID,
-    currentEntryId
-  );
-  const res = await sendReq(uri, options);
-  return await res.json();
-};
-
-/**
- * The function `stopCurrentEntry` stops the current time entry and displays a success message or an
- * error message.
- * @param app{object} - The application object that provides access to the app's functionality and
+ * The function `confirmStopRunningEntry` checks if the current entry description matches the current
+ * note name and prompts the user to confirm if they want to stop the running entry.
+ *
+ * @param app{Object} - The application object that provides access to the app's functionality and
  * context.
- * @param constants{object} - Constants object
- * @param uris{object} - URIS object
+ * @param app.prompt{callable} - Prompt the user
+ * @param currentEntryDescription{string} - The description of the current running entry.
+ * @param currentNoteName{string} - The name of the current note or entry.
+ * @returns{Promise<boolean>} The function `confirmStopRunningEntry` returns a boolean value.
  */
-export const stopCurrentEntry = async (app, constants, uris) => {
-  try {
-    const currentEntry = await getCurrentTimeEntry(constants, uris);
-    if (!currentEntry) throw new TypeError("There is no running time entry");
-    const stoppedEntry = await stopCurrentTimeEntry(
-      currentEntry.id,
-      constants,
-      uris
-    );
-    app.alert(`"${stoppedEntry.description}" stopped successfully`);
-  } catch (e) {
-    app.alert(`stopCurrentEntry: ${e}`);
-  }
+export const confirmStopRunningEntry = async (
+  app,
+  currentEntryDescription,
+  currentNoteName
+) => {
+  if (currentEntryDescription === currentNoteName) return true;
+  const value = await app.prompt(
+    `Current running entry: "${currentEntryDescription}"`,
+    {
+      inputs: [
+        {
+          type: "checkbox",
+          label: "Stop anyway?",
+        },
+      ],
+    }
+  );
+  return value;
 };

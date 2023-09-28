@@ -3,3 +3,10 @@ export const sendReq = async (uri, options) => {
   apiURL.searchParams.set("apiurl", uri);
   return await fetch(apiURL, options);
 };
+
+
+export const findNote = async (app, filter) => {
+  const currentNote = await app.findNote(filter);
+  if (!currentNote) throw new TypeError("Note is not available");
+  return currentNote;
+};

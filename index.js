@@ -1,6 +1,10 @@
 import { startTimeEntry } from "./features/start-time/start";
-import { stopCurrentEntry } from "./features/stop-time/stop";
-import { sendReq } from "./shared/utils";
+import {
+  stopCurrentTimeEntry,
+  getCurrentTimeEntry,
+} from "./shared/entriesService";
+import { confirmStopRunningEntry } from "./features/stop-time/stop";
+import { sendReq, findNote } from "./shared/utils";
 
 const main = {
   /** Constants */
@@ -52,8 +56,26 @@ const main = {
   },
   /** Note Options */
   noteOption: {
-    Stop: async function (app) {
-      await stopCurrentEntry(app, this.constants, this.URIS);
+    Stop: async function (app, noteUUID) {
+      try {
+        const currentEntry = await getCurrentTimeEntry(constants, uris);
+        if (!currentEntry) return app.alert("There is no running time entry.");
+        const currentNote = await findNote(app, { uuid: noteUUID });
+        const isStopCurrent = await confirmStopRunningEntry(
+          app,
+          currentEntry.description,
+          currentNote.name
+        );
+        if (!isStopCurrent) return;
+        const stoppedEntry = await stopCurrentTimeEntry(
+          currentEntry.id,
+          constants,
+          uris
+        );
+        app.alert(`"${stoppedEntry.description}" stopped successfully`);
+      } catch (e) {
+        app.alert(`stopCurrentEntry: ${e}`);
+      }
     },
   },
 };
