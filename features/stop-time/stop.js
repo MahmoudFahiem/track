@@ -54,6 +54,7 @@ const stopCurrentTimeEntry = async (currentEntryId, constants, URIS) => {
 export const stopCurrentEntry = async (app, constants, uris) => {
   try {
     const currentEntry = await getCurrentTimeEntry(constants, uris);
+    if (!currentEntry) throw new TypeError("There is no running time entry");
     const stoppedEntry = await stopCurrentTimeEntry(
       currentEntry.id,
       constants,
