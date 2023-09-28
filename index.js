@@ -253,7 +253,7 @@ const main = {
       };
       const uri = self.uris.stop(
         self.constants.BASE_URI,
-        self.constants.WORKSPACE_ID,
+        self._utils.getWorkspaceId.call(self, app),
         currentEntryId
       );
       const res = await self._utils.sendRequest.call(self, uri, options);
@@ -262,12 +262,13 @@ const main = {
     /**
      * The function `startTracking` is used to create a new time tracking entry with a given description
      * and other constants.
-     * @param description{string} Task description
+     * @param {string} description Task description
+     * @param {string} workspaceId workspace id
      * @param {string} token - Toggl Track personal token.
      * @returns The function `startTracking` is returning the response from the `sendReq` function as a
      * JSON object.
      */
-    sendTrackingRequest: async function (description, token) {
+    sendTrackingRequest: async function (description, token, workspaceId) {
       /**
        * @type {main}
        */
@@ -277,7 +278,7 @@ const main = {
         description,
         duration: -1,
         start: new Date().toISOString(),
-        workspace_id: self.constants.WORKSPACE_ID,
+        workspace_id: workspaceId,
       };
       const options = {
         method: "POST",
@@ -287,10 +288,7 @@ const main = {
           Authorization: `Basic ${btoa(token + ":api_token")}`,
         },
       };
-      const uri = self.uris.track(
-        self.constants.BASE_URI,
-        self.constants.WORKSPACE_ID
-      );
+      const uri = self.uris.track(self.constants.BASE_URI, workspaceId);
       const entry = await self._utils.sendRequest.call(self, uri, options);
       return await entry.json();
     },
@@ -359,7 +357,7 @@ const main = {
       return task;
     },
     /**
-     * A wrapper for app's findNote method that throws error if the note is not found.
+     * Gets person token from the plugin settings.
      *
      * @param {object} app - The application object that provides access to the app's functionality and
      * context.
@@ -377,6 +375,26 @@ const main = {
           "Toggl Track's personal token is not configured. Please add it in the plugin's settings."
         );
       return token;
+    },
+    /**
+     * Gets workspace from the plugin settings.
+     *
+     * @param {object} app - The application object that provides access to the app's functionality and
+     * context.
+     * @returns {string} The workspace id.
+     * @throws TypeError if the token is not set.
+     */
+    getWorkspaceId: function (app) {
+      /**
+       * @type {main}
+       */
+      const self = this;
+      const workspaceId = app.settings["Workspace Id"];
+      if (!workspaceId)
+        throw new TypeError(
+          "Workspace id is not configured. Please add it in the plugin's settings."
+        );
+      return workspaceId;
     },
   },
 };
