@@ -44,4 +44,10 @@ const main = {
       },
     },
   },
+  /** App Options */
+  appOption: {
+    Stop: async (app) => {
+      await stopCurrentEntry(app, this.constants, this.URIS);
+    },
+  },
 };
