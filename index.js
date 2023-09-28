@@ -58,6 +58,7 @@ const main = {
             return app.alert("There is no running time entry.");
           const task = await self._utils.getTask.call(
             self,
+            app,
             app.context.taskUUID
           );
           const formattedTask = self._utils.formatTaskDescription.call(
