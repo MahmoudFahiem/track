@@ -140,7 +140,11 @@ const main = {
        */
       const self = this;
       try {
-        const task = await self._utils.getTask.call(self, app.context.taskUUID);
+        const task = await self._utils.getTask.call(
+          self,
+          app,
+          app.context.taskUUID
+        );
         const formattedTask = self._utils.formatTaskDescription.call(
           self,
           task.content
