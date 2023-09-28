@@ -2,6 +2,7 @@ import { startTimeEntry } from "./features/start-time/start";
 import { stopCurrentEntry } from "./features/stop-time/stop";
 
 const main = {
+  /** Constants */
   constants: {
     BASE_URI: "https://api.track.toggl.com/api/v9",
     PROXY: "https://plugins.amplenote.com/cors-proxy",
@@ -9,6 +10,7 @@ const main = {
     PASS: "api_token",
     WORKSPACE_ID: 4075588,
   },
+  /** URIS */
   URIS: {
     me: (baseUri) => `${baseUri}/me`,
     entries: (baseUri) => `${baseUri}/me/time_entries`,
@@ -20,6 +22,7 @@ const main = {
     stop: (baseUri, workspaceId, entryId) =>
       `${baseUri}/workspaces/${workspaceId}/time_entries/${entryId}/stop`,
   },
+  /** Insert Text */
   insertText: {
     Start: {
       async check(app) {
