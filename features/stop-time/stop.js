@@ -51,14 +51,14 @@ const stopCurrentTimeEntry = async (currentEntryId, constants, URIS) => {
  * @param constants{object} - Constants object
  * @param uris{object} - URIS object
  */
-export const stopCurrentEntry = async (app, constants, URIS) => {
+export const stopCurrentEntry = async (app, constants, uris) => {
   try {
-    const currentEntry = await getCurrentTimeEntry({ constants, URIS });
-    const stoppedEntry = await stopCurrentTimeEntry({
-      currentEntryId: currentEntry.id,
+    const currentEntry = await getCurrentTimeEntry(constants, uris);
+    const stoppedEntry = await stopCurrentTimeEntry(
+      currentEntry.id,
       constants,
-      URIS,
-    });
+      uris
+    );
     app.alert(JSON.stringify(stoppedEntry));
     //app.alert(`"${stoppedEntry.description}" stopped successfully`);
   } catch (e) {
