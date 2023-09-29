@@ -40,12 +40,7 @@ const main = {
             self,
             task.content
           );
-          const entry = await self._startMain.startTimeEntry.call(
-            self,
-            app,
-            formattedTask
-          );
-          app.alert(`Currently tracking, "${entry.description}"`);
+          await self._startMain.startTimeEntry.call(self, app, formattedTask);
         } catch (e) {
           app.alert(e);
         }
@@ -112,12 +107,7 @@ const main = {
         const note = await self._utils.findNote.call(self, app, {
           uuid: noteUUID,
         });
-        const entry = await self._startMain.startTimeEntry.call(
-          self,
-          app,
-          note.name
-        );
-        app.alert(`Currently tracking, "${entry.description}"`);
+        await self._startMain.startTimeEntry.call(self, app, note.name);
       } catch (e) {
         app.alert(e);
       }
@@ -166,6 +156,7 @@ const main = {
      * @param {object} app - The application object that provides access to the app's functionality and
      * context.
      * @param {string} entryDescription - The entry description.
+     * @returns {Promise<void>}
      */
     startTimeEntry: async function (app, entryDescription) {
       /**
@@ -185,12 +176,13 @@ const main = {
           currentEntry
         );
       if (!isOverrideCurrentEntry) return;
-      return await self._entriesService.sendTrackingRequest.call(
+      const entry = await self._entriesService.sendTrackingRequest.call(
         self,
         entryDescription,
         token,
         workspaceId
       );
+      app.alert(`Currently tracking, "${entry.description}"`);
     },
     /**
      * The function `confirmOverrideRunningEntry` checks if the
