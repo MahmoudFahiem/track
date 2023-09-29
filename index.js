@@ -95,7 +95,8 @@ const main = {
           uuid: noteUUID,
         });
         const token = self._utils.getToken(app);
-        const currentEntry = await self._entriesService.getCurrentTimeEntry(
+        const currentEntry = await self._entriesService.getCurrentTimeEntry.call(
+          self,
           token
         );
         const isOverrideCurrentEntry =
