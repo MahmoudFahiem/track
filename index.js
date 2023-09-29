@@ -94,11 +94,22 @@ const main = {
         const note = await self._utils.findNote.call(self, app, {
           uuid: noteUUID,
         });
+        const token = self._utils.getToken(app);
+        const currentEntry = await self._entriesService.getCurrentTimeEntry(
+          token
+        );
+        const isOverrideCurrentEntry =
+          self._startMain.confirmOverrideRunningEntry.call(
+            self,
+            app,
+            currentEntry
+          );
+        if (!isOverrideCurrentEntry) return;
         const entry = await self._entriesService.sendTrackingRequest.call(
           self,
           note.name,
-          self._utils.getToken(app),
-          self._utils.getWorkspaceId(app)
+          self._utils.getToken.call(self, app),
+          self._utils.getWorkspaceId.call(self, app)
         );
         app.alert(`Currently tracking, "${entry.description}"`);
       } catch (e) {
@@ -174,6 +185,28 @@ const main = {
       } catch (e) {
         app.alert(`startTimeEntry: ${e}`);
       }
+    },
+    /**
+     * The function `confirmOverrideRunningEntry` checks if the
+     *
+     * @param {object} app - The application object that provides access to the app's functionality and
+     * context.
+     * @returns {Promise<boolean>} The function `confirmStopRunningEntry` returns a boolean value.
+     */
+    confirmOverrideRunningEntry: async (app) => {
+      if (currentEntryDescription === currentTaskName) return true;
+      const value = await app.prompt(
+        `Current running entry: "${currentEntryDescription}"`,
+        {
+          inputs: [
+            {
+              type: "checkbox",
+              label: "Stop anyway?",
+            },
+          ],
+        }
+      );
+      return value;
     },
   },
   /** Stop Time Feature */
