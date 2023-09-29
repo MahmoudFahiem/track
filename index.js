@@ -95,10 +95,8 @@ const main = {
           uuid: noteUUID,
         });
         const token = self._utils.getToken(app);
-        const currentEntry = await self._entriesService.getCurrentTimeEntry.call(
-          self,
-          token
-        );
+        const currentEntry =
+          await self._entriesService.getCurrentTimeEntry.call(self, token);
         const isOverrideCurrentEntry =
           self._startMain.confirmOverrideRunningEntry.call(
             self,
@@ -196,7 +194,7 @@ const main = {
      * @returns {Promise<boolean>} The function `confirmStopRunningEntry` returns a boolean value.
      */
     confirmOverrideRunningEntry: async (app, currentEntryDescription) => {
-      if (currentEntry) return true;
+      if (currentEntryDescription) return true;
       const value = await app.prompt(
         `Current running entry: "${currentEntryDescription}"`,
         {
