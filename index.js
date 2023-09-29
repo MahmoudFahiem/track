@@ -194,7 +194,7 @@ const main = {
      * @returns {Promise<boolean>} The function `confirmStopRunningEntry` returns a boolean value.
      */
     confirmOverrideRunningEntry: async (app, currentEntryDescription) => {
-      if (currentEntryDescription) return true;
+      if (!currentEntryDescription) return true;
       const value = await app.prompt(
         `Current running entry: "${currentEntryDescription}"`,
         {
