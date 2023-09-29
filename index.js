@@ -102,7 +102,7 @@ const main = {
           self._startMain.confirmOverrideRunningEntry.call(
             self,
             app,
-            currentEntry
+            currentEntry.description
           );
         if (!isOverrideCurrentEntry) return;
         const entry = await self._entriesService.sendTrackingRequest.call(
@@ -191,17 +191,18 @@ const main = {
      *
      * @param {object} app - The application object that provides access to the app's functionality and
      * context.
+     * @param {string} currentEntryDescription - The description of the current running entry.
      * @returns {Promise<boolean>} The function `confirmStopRunningEntry` returns a boolean value.
      */
-    confirmOverrideRunningEntry: async (app) => {
-      if (currentEntryDescription === currentTaskName) return true;
+    confirmOverrideRunningEntry: async (app, currentEntryDescription) => {
+      if (currentEntry) return true;
       const value = await app.prompt(
         `Current running entry: "${currentEntryDescription}"`,
         {
           inputs: [
             {
               type: "checkbox",
-              label: "Stop anyway?",
+              label: "Override?",
             },
           ],
         }
