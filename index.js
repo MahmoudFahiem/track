@@ -98,7 +98,7 @@ const main = {
         const currentEntry =
           await self._entriesService.getCurrentTimeEntry.call(self, token);
         const isOverrideCurrentEntry =
-          self._startMain.confirmOverrideRunningEntry.call(
+          await self._startMain.confirmOverrideRunningEntry.call(
             self,
             app,
             currentEntry
