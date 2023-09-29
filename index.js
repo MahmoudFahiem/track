@@ -30,7 +30,25 @@ const main = {
          * @type {main}
          */
         const self = this;
-        await self._startMain.startTimeEntry.call(self, app);
+        try {
+          const task = await self._utils.getTask.call(
+            self,
+            app,
+            app.context.taskUUID
+          );
+          const formattedTask = self._utils.formatTaskDescription.call(
+            self,
+            task.content
+          );
+          const entry = await self._startMain.startTimeEntry.call(
+            self,
+            app,
+            formattedTask
+          );
+          app.alert(`Currently tracking, "${entry.description}"`);
+        } catch (e) {
+          app.alert(e);
+        }
         return "";
       },
     },
@@ -94,21 +112,10 @@ const main = {
         const note = await self._utils.findNote.call(self, app, {
           uuid: noteUUID,
         });
-        const token = self._utils.getToken(app);
-        const currentEntry =
-          await self._entriesService.getCurrentTimeEntry.call(self, token);
-        const isOverrideCurrentEntry =
-          await self._startMain.confirmOverrideRunningEntry.call(
-            self,
-            app,
-            currentEntry
-          );
-        if (!isOverrideCurrentEntry) return;
-        const entry = await self._entriesService.sendTrackingRequest.call(
+        const entry = await self._startMain.startTimeEntry.call(
           self,
-          note.name,
-          self._utils.getToken.call(self, app),
-          self._utils.getWorkspaceId.call(self, app)
+          app,
+          note.name
         );
         app.alert(`Currently tracking, "${entry.description}"`);
       } catch (e) {
@@ -158,32 +165,32 @@ const main = {
      *
      * @param {object} app - The application object that provides access to the app's functionality and
      * context.
+     * @param {string} entryDescription - The entry description.
      */
-    startTimeEntry: async function (app) {
+    startTimeEntry: async function (app, entryDescription) {
       /**
        * @type {main}
        */
       const self = this;
-      try {
-        const task = await self._utils.getTask.call(
+      const token = self._utils.getToken.call(self, app);
+      const workspaceId = self._utils.getWorkspaceId.call(self, app);
+      const currentEntry = await self._entriesService.getCurrentTimeEntry.call(
+        self,
+        token
+      );
+      const isOverrideCurrentEntry =
+        await self._startMain.confirmOverrideRunningEntry.call(
           self,
           app,
-          app.context.taskUUID
+          currentEntry
         );
-        const formattedTask = self._utils.formatTaskDescription.call(
-          self,
-          task.content
-        );
-        const entry = await self._entriesService.sendTrackingRequest.call(
-          self,
-          formattedTask,
-          self._utils.getToken(app),
-          self._utils.getWorkspaceId(app)
-        );
-        app.alert(`Currently tracking, "${entry.description}"`);
-      } catch (e) {
-        app.alert(`startTimeEntry: ${e}`);
-      }
+      if (!isOverrideCurrentEntry) return;
+      return await self._entriesService.sendTrackingRequest.call(
+        self,
+        entryDescription,
+        token,
+        workspaceId
+      );
     },
     /**
      * The function `confirmOverrideRunningEntry` checks if the
