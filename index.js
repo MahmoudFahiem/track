@@ -45,7 +45,10 @@ const main = {
         const self = this;
         try {
           const currentEntry =
-            await self._entriesService.getCurrentTimeEntry.call(self);
+            await self._entriesService.getCurrentTimeEntry.call(
+              self,
+              self._utils.getToken(app)
+            );
           if (!currentEntry)
             return app.alert("There is no running time entry.");
           const task = await self._utils.getTask.call(
