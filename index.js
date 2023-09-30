@@ -181,7 +181,7 @@ const main = {
         token,
         workspaceId
       );
-      app.alert(`Currently tracking, "${entry.description}"`);
+      app.alert(`start tracking: "${entry.description}"`);
     },
     /**
      * The function `confirmOverrideRunningEntry` checks if the
