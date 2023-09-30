@@ -5,7 +5,6 @@ const main = {
     BASE_URI: "https://api.track.toggl.com/api/v9",
     PROXY: "https://plugins.amplenote.com/cors-proxy",
     PASS: "api_token",
-    WORKSPACE_ID: 4075588,
   },
   /** URIS */
   uris: {
@@ -367,10 +366,6 @@ const main = {
      * @returns {string} - The formatted task description
      */
     formatTaskDescription: function (taskDescription) {
-      /**
-       * @type {main}
-       */
-      const self = this;
       return taskDescription.replaceAll(/{.+/g, "").trim();
     },
     /**
@@ -383,10 +378,6 @@ const main = {
      * @throws TypeError if the note is not found.
      */
     getTask: async function (app, taskUUID) {
-      /**
-       * @type {main}
-       */
-      const self = this;
       const task = await app.getTask(taskUUID);
       if (!task) throw new TypeError("Task not found");
       return task;
@@ -400,10 +391,6 @@ const main = {
      * @throws TypeError if the token is not set.
      */
     getToken: function (app) {
-      /**
-       * @type {main}
-       */
-      const self = this;
       const token = app.settings["Personal Token"];
       if (!token)
         throw new TypeError(
@@ -420,10 +407,6 @@ const main = {
      * @throws TypeError if the token is not set.
      */
     getWorkspaceId: function (app) {
-      /**
-       * @type {main}
-       */
-      const self = this;
       const workspaceId = app.settings["Workspace Id"];
       if (!workspaceId)
         throw new TypeError(
