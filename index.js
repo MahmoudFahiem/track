@@ -107,6 +107,13 @@ const main = {
           uuid: noteUUID,
         });
         await self._startMain.startTimeEntry.call(self, app, note.name);
+        const projects = await self._entriesService.call(
+          self,
+          self._utils.getToken(),
+          self._utils.getWorkspaceId()
+        );
+        const projectNames = projects.map((project) => project.name);
+        app.alert(projectNames.join("\n"));
       } catch (e) {
         app.alert(e);
       }
@@ -299,8 +306,7 @@ const main = {
      * @param {string} description Task description
      * @param {string} workspaceId workspace id
      * @param {string} token - Toggl Track personal token.
-     * @returns The function `startTracking` is returning the response from the `sendReq` function as a
-     * JSON object.
+     * @returns the response from the `sendReq` function as a JSON object.
      */
     sendTrackingRequest: async function (description, token, workspaceId) {
       /**
@@ -323,6 +329,34 @@ const main = {
         },
       };
       const uri = self.uris.track(self.constants.BASE_URI, workspaceId);
+      const entry = await self._utils.sendRequest.call(self, uri, options);
+      return await entry.json();
+    },
+    /**
+     * The function `getProjects` is used to retrieve workspace projects.
+     * @param {string} workspaceId workspace id
+     * @param {string} token - Toggl Track personal token.
+     * @returns the response from the `sendReq` function as a JSON object.
+     */
+    getProjects: async function (token, workspaceId) {
+      /**
+       * @type {main}
+       */
+      const self = this;
+      const options = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Basic ${btoa(token + ":api_token")}`,
+        },
+      };
+      const searchParams = new URLSearchParams({
+        active: true,
+      });
+      const uri = `${self.uris.projects(
+        self.constants.BASE_URI,
+        workspaceId
+      )}?${searchParams}}`;
       const entry = await self._utils.sendRequest.call(self, uri, options);
       return await entry.json();
     },
