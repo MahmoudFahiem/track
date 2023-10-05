@@ -160,9 +160,31 @@ const main = {
         app.alert(e);
       }
     },
+    "Create a project": async function (app) {
+      /**
+       * @type {main}
+       */
+      const self = this;
+      try {
+        await self._projectMain.createProject.call(self, app);
+      } catch (e) {
+        app.alert(e);
+      }
+    },
   },
   /** App Options */
   appOption: {
+    "Create a project": async function (app) {
+      /**
+       * @type {main}
+       */
+      const self = this;
+      try {
+        await self._projectMain.createProject.call(self, app);
+      } catch (e) {
+        app.alert(e);
+      }
+    },
     "Create a client": async function (app) {
       /**
        * @type {main}
@@ -384,6 +406,86 @@ const main = {
       });
     },
   },
+  _projectMain: {
+    /**
+     * Creates a new project.
+     * @param {object} app - The application object that provides access to the app's functionality and
+     * context.
+     */
+    createProject: async function (app) {
+      /**
+       * @type {main}
+       */
+      const self = this;
+      const token = self._utils.getToken.call(self, app);
+      const workspaceId = self._utils.getWorkspaceId.call(self, app);
+      const clients = await self._entriesService.getClients.call(
+        self,
+        token,
+        workspaceId
+      );
+      const projectDetails =
+        await self._projectMain.promptUserForProjectDetails.call(
+          self,
+          app,
+          clients
+        );
+      if (!projectDetails) return;
+      const createdProject = await self._entriesService.createProject.call(
+        self,
+        token,
+        workspaceId,
+        projectDetails
+      );
+      app.alert(`Project "${createdProject.name}" is created successfully`);
+    },
+    /**
+     * Prompts the user for project details.
+     * @param {object} app - The application object that provides access.
+     * @param {Array<object>} clients - workspace clients
+     * @returns {Promise<ProjectDetails>} project data object.
+     */
+    promptUserForProjectDetails: async function (app, clients) {
+      const clientOptions = clients.map((client) => ({
+        label: client.name,
+        value: client.name,
+      }));
+      const formValues = await app.prompt("Enter Project Details:", {
+        inputs: [
+          {
+            label: "Project Name",
+            type: "text",
+          },
+          {
+            label: "Client Name",
+            type: "select",
+            options: clientOptions,
+          },
+          {
+            label: "Or Enter New Client Name",
+            type: "text",
+          },
+          {
+            label: "Is Active",
+            type: "checkbox",
+            value: true,
+          },
+          {
+            label: "Is Private",
+            type: "checkbox",
+            value: true,
+          },
+        ],
+      });
+      if (!formValues) return;
+      return {
+        name: formValues[0],
+        clientName: formValues[1] || formValues[2],
+        isActive: formValues[3],
+        isPrivate: formValues[4],
+      };
+    },
+  },
   /** Time Entries Service */
   _entriesService: {
     /**
@@ -498,6 +600,35 @@ const main = {
         self.constants.BASE_URI,
         workspaceId
       )}?${searchParams}`;
+      const res = await self._utils.sendRequest.call(self, uri, options);
+      return await res.json();
+    },
+    /**
+     * The function `createProject` is used to create a project.
+     * @param {number} workspaceId workspace id.
+     * @param {string} token - Toggl Track personal token.
+     * @param {ProjectDetails} projectDetails - project data object.
+     * @returns the response from the `sendReq` function as a JSON object.
+     */
+    createProject: async function (token, workspaceId, projectDetails) {
+      /**
+       * @type {main}
+       */
+      const self = this;
+      const options = {
+        method: "POST",
+        body: JSON.stringify({
+          name: projectDetails.name,
+          client_name: projectDetails.clientName,
+          active: projectDetails.isActive,
+          is_private: projectDetails.isPrivate,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Basic ${btoa(token + ":api_token")}`,
+        },
+      };
+      const uri = self.uris.projects(self.constants.BASE_URI, workspaceId);
       const res = await self._utils.sendRequest.call(self, uri, options);
       return await res.json();
     },
