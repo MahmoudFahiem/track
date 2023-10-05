@@ -17,6 +17,8 @@ const main = {
       `${baseUri}/workspaces/${workspaceId}/projects`,
     stop: (baseUri, workspaceId, entryId) =>
       `${baseUri}/workspaces/${workspaceId}/time_entries/${entryId}/stop`,
+    clients: (baseUri, workspaceId) =>
+      `${baseUri}/workspaces/${workspaceId}/clients`,
   },
   /** Insert Text */
   insertText: {
@@ -39,7 +41,15 @@ const main = {
             self,
             task.content
           );
-          await self._startMain.startTimeEntry.call(self, app, formattedTask);
+          const note = await self._utils.findNote.call(self, app, {
+            uuid: task.noteUUID,
+          });
+          await self._startMain.startTimeEntry.call(
+            self,
+            app,
+            formattedTask,
+            note.tags
+          );
         } catch (e) {
           app.alert(e);
         }
@@ -146,6 +156,20 @@ const main = {
             self._utils.getWorkspaceId(app)
           );
         app.alert(`"${stoppedEntry.description}" stopped successfully`);
+      } catch (e) {
+        app.alert(e);
+      }
+    },
+  },
+  /** App Options */
+  appOption: {
+    "Create a client": async function (app) {
+      /**
+       * @type {main}
+       */
+      const self = this;
+      try {
+        await self._clientMain.createClient.call(self, app);
       } catch (e) {
         app.alert(e);
       }
@@ -317,6 +341,49 @@ const main = {
       return value;
     },
   },
+  _clientMain: {
+    /**
+     * Creates a new client.
+     * @param {object} app - The application object that provides access to the app's functionality and
+     * context.
+     */
+    createClient: async function (app) {
+      /**
+       * @type {main}
+       */
+      const self = this;
+      const clientName = await self._clientMain.promptUserForClientDetails.call(
+        self,
+        app
+      );
+      if (!clientName) return;
+      const token = self._utils.getToken.call(self, app);
+      const workspaceId = self._utils.getWorkspaceId.call(self, app);
+      const createdClient = await self._entriesService.createClient.call(
+        self,
+        token,
+        workspaceId,
+        clientName
+      );
+      app.alert(`Client "${createdClient.name}" created successfully`);
+    },
+    /**
+     * Prompts the user for client information.
+     * @param {object} app - The application object that provides access
+     * @returns {string} - Client name
+     */
+    promptUserForClientDetails: async function (app) {
+      return await app.prompt("Enter client details:", {
+        inputs: [
+          {
+            label: "Client Name",
+            type: "text",
+            placeholder: "Client Name",
+          },
+        ],
+      });
+    },
+  },
   /** Time Entries Service */
   _entriesService: {
     /**
@@ -348,7 +415,7 @@ const main = {
      * to the specified URI with the provided options.
      * @param {string} currentEntryId - the ID of the time entry that you want to stop.
      * @param {string} token - Toggl Track personal token.
-     * @param {string} workspaceId workspace id
+     * @param {number} workspaceId workspace id
      * @returns {object} the stopped time entry.
      */
     stopCurrentTimeEntry: async function (currentEntryId, token, workspaceId) {
@@ -375,7 +442,7 @@ const main = {
      * The function `startTracking` is used to create a new time tracking entry with a given description
      * and other constants.
      * @param {EntryDetails} entryDetails - entry details
-     * @param {string} workspaceId - workspace id
+     * @param {number} workspaceId - workspace id
      * @param {string} token - Toggl Track personal token.
      * @returns the response from the `sendReq` function as a JSON object.
      */
@@ -408,7 +475,7 @@ const main = {
     },
     /**
      * The function `getProjects` is used to retrieve workspace projects.
-     * @param {string} workspaceId workspace id
+     * @param {number} workspaceId workspace id
      * @param {string} token - Toggl Track personal token.
      * @returns the response from the `sendReq` function as a JSON object.
      */
@@ -431,8 +498,63 @@ const main = {
         self.constants.BASE_URI,
         workspaceId
       )}?${searchParams}`;
-      const entry = await self._utils.sendRequest.call(self, uri, options);
-      return await entry.json();
+      const res = await self._utils.sendRequest.call(self, uri, options);
+      return await res.json();
+    },
+    /**
+     * The function `getClients` is used to retrieve workspace clients.
+     * @param {number} workspaceId workspace id
+     * @param {string} token - Toggl Track personal token.
+     * @returns the response from the `sendReq` function as a JSON object.
+     */
+    getClients: async function (token, workspaceId) {
+      /**
+       * @type {main}
+       */
+      const self = this;
+      const options = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Basic ${btoa(token + ":api_token")}`,
+        },
+      };
+      const searchParams = new URLSearchParams({
+        archived: false,
+      });
+      const uri = `${self.uris.clients(
+        self.constants.BASE_URI,
+        workspaceId
+      )}?${searchParams}`;
+      const res = await self._utils.sendRequest.call(self, uri, options);
+      return await res.json();
+    },
+    /**
+     * The function `createClient` is used to create a client.
+     * @param {number} workspaceId workspace id.
+     * @param {string} token - Toggl Track personal token.
+     * @param {string} clientName - Client data object.
+     * @returns the response from the `sendReq` function as a JSON object.
+     */
+    createClient: async function (token, workspaceId, clientName) {
+      /**
+       * @type {main}
+       */
+      const self = this;
+      const options = {
+        method: "POST",
+        body: JSON.stringify({
+          name: clientName,
+          wid: workspaceId,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Basic ${btoa(token + ":api_token")}`,
+        },
+      };
+      const uri = self.uris.clients(self.constants.BASE_URI, workspaceId);
+      const res = await self._utils.sendRequest.call(self, uri, options);
+      return await res.json();
     },
   },
   /** General Utils */
