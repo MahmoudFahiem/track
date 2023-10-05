@@ -274,6 +274,7 @@ const main = {
           },
         ],
       });
+      if (!formValues) return;
       const projectId = parseInt(formValues[1]);
       if (isNaN(projectId)) throw new TypeError("Invalid project id number");
       return {
