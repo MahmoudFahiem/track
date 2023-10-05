@@ -106,14 +106,12 @@ const main = {
         const note = await self._utils.findNote.call(self, app, {
           uuid: noteUUID,
         });
-        await self._startMain.startTimeEntry.call(self, app, note.name);
-        const projects = await self._entriesService.call(
+        await self._startMain.startTimeEntry.call(
           self,
-          self._utils.getToken(),
-          self._utils.getWorkspaceId()
+          app,
+          note.name,
+          note.tags
         );
-        const projectNames = projects.map((project) => project.name);
-        app.alert(projectNames.join("\n"));
       } catch (e) {
         app.alert(e);
       }
@@ -162,9 +160,10 @@ const main = {
      * @param {object} app - The application object that provides access to the app's functionality and
      * context.
      * @param {string} entryDescription - The entry description.
+     * @param {Nullable<Array<string>>} noteTags - note tags
      * @returns {Promise<void>}
      */
-    startTimeEntry: async function (app, entryDescription) {
+    startTimeEntry: async function (app, entryDescription, noteTags) {
       /**
        * @type {main}
        */
@@ -182,9 +181,25 @@ const main = {
           currentEntry
         );
       if (!isOverrideCurrentEntry) return;
+      const projects = await self._entriesService.getProjects.call(
+        self,
+        token,
+        workspaceId
+      );
+      /**
+       * @type {EntryDetails}
+       */
+      const entryDetails = await self._startMain.promptUserForEntryDetails.call(
+        self,
+        app,
+        projects,
+        entryDescription,
+        noteTags || []
+      );
+      if (!entryDetails) return;
       const entry = await self._entriesService.sendTrackingRequest.call(
         self,
-        entryDescription,
+        entryDetails,
         token,
         workspaceId
       );
@@ -215,20 +230,28 @@ const main = {
     },
     /**
      * Prompts the user for entry details
-     * 
      * @param {object} app - The application object that provides access to the app's functionality and
      * context.
      * @param {Array<object>} projects - Workspace projects
      * @param {string} description - Entry description
      * @param {Array<string>} tags - Entry tags
-     * @returns {Promise<Array<object>>} User values
+     * @returns {Promise<EntryDetails>} User values
      */
-    promptUserForEntryDetails: async (app, projects, description, tags) => {
+    promptUserForEntryDetails: async function (
+      app,
+      projects,
+      description,
+      tags
+    ) {
+      /**
+       * @type {main}
+       */
+      const self = this;
       const projectsOptions = projects.map((project) => ({
         label: project.name,
         value: project.id,
       }));
-      return await app.prompt(`Choose Entry Details:`, {
+      const formValues = await app.prompt(`Choose Entry Details:`, {
         inputs: [
           {
             label: "Description",
@@ -251,6 +274,14 @@ const main = {
           },
         ],
       });
+      const projectId = parseInt(formValues[1]);
+      if (isNaN(projectId)) throw new TypeError("Invalid project id number");
+      return {
+        description: formValues[0],
+        projectId: projectId,
+        isBillable: formValues[2],
+        tags: self._utils.splitStringOnComma.call(self, formValues[3]),
+      };
     },
   },
   /** Stop Time Feature */
@@ -342,19 +373,22 @@ const main = {
     /**
      * The function `startTracking` is used to create a new time tracking entry with a given description
      * and other constants.
-     * @param {string} description Task description
-     * @param {string} workspaceId workspace id
+     * @param {EntryDetails} entryDetails - entry details
+     * @param {string} workspaceId - workspace id
      * @param {string} token - Toggl Track personal token.
      * @returns the response from the `sendReq` function as a JSON object.
      */
-    sendTrackingRequest: async function (description, token, workspaceId) {
+    sendTrackingRequest: async function (entryDetails, token, workspaceId) {
       /**
        * @type {main}
        */
       const self = this;
       const body = {
         created_with: "Amplenote track plugin",
-        description,
+        description: entryDetails.description,
+        project_id: entryDetails.projectId,
+        tags: entryDetails.tags || [],
+        billable: entryDetails.isBillable || false,
         duration: -1,
         start: new Date().toISOString(),
         workspace_id: workspaceId,
@@ -368,8 +402,8 @@ const main = {
         },
       };
       const uri = self.uris.track(self.constants.BASE_URI, workspaceId);
-      const entry = await self._utils.sendRequest.call(self, uri, options);
-      return await entry.json();
+      const res = await self._utils.sendRequest.call(self, uri, options);
+      return await res.json();
     },
     /**
      * The function `getProjects` is used to retrieve workspace projects.
@@ -395,7 +429,7 @@ const main = {
       const uri = `${self.uris.projects(
         self.constants.BASE_URI,
         workspaceId
-      )}?${searchParams}}`;
+      )}?${searchParams}`;
       const entry = await self._utils.sendRequest.call(self, uri, options);
       return await entry.json();
     },
@@ -416,7 +450,12 @@ const main = {
       const self = this;
       const apiURL = new URL(self.constants.PROXY);
       apiURL.searchParams.set("apiurl", uri);
-      return await fetch(apiURL, options);
+      const res = await fetch(apiURL, options);
+      if (!res.ok)
+        throw new TypeError(
+          `Error while sending a request to ${apiURL} with status code ${res.status}`
+        );
+      return res;
     },
     /**
      * A wrapper for app's findNote method that throws error if the note is not found
@@ -489,6 +528,15 @@ const main = {
       if (isNaN(workspaceId))
         throw new TypeError("Workspace id is not a valid number.");
       return workspaceIdNumber;
+    },
+    /**
+     *
+     * @param {string} string - The string like array to be splitted
+     * @returns {Array<string>} - Array of strings
+     */
+    splitStringOnComma: function (string) {
+      if (!string) return [];
+      return string.split(",").map((string) => string.trim());
     },
   },
 };
