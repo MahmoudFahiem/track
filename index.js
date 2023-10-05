@@ -213,6 +213,45 @@ const main = {
       );
       return value;
     },
+    /**
+     * Prompts the user for entry details
+     * 
+     * @param {object} app - The application object that provides access to the app's functionality and
+     * context.
+     * @param {Array<object>} projects - Workspace projects
+     * @param {string} description - Entry description
+     * @param {Array<string>} tags - Entry tags
+     * @returns {Promise<Array<object>>} User values
+     */
+    promptUserForEntryDetails: async (app, projects, description, tags) => {
+      const projectsOptions = projects.map((project) => ({
+        label: project.name,
+        value: project.id,
+      }));
+      return await app.prompt(`Choose Entry Details:`, {
+        inputs: [
+          {
+            label: "Description",
+            type: "text",
+            value: description,
+          },
+          {
+            label: "Project",
+            type: "select",
+            options: projectsOptions,
+          },
+          {
+            label: "Is Billable",
+            type: "checkbox",
+          },
+          {
+            label: "Tags",
+            type: "text",
+            value: tags.join(", "),
+          },
+        ],
+      });
+    },
   },
   /** Stop Time Feature */
   _stopMain: {
