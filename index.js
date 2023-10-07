@@ -166,7 +166,9 @@ const main = {
        */
       const self = this;
       try {
-        const currentNote = await self._utils.findNote({ noteUUID });
+        const currentNote = await self._utils.findNote.call(self, app, {
+          uuid: noteUUID,
+        });
         await self._projectMain.createProject.call(self, app, currentNote.name);
       } catch (e) {
         app.alert(e);
