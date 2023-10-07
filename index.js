@@ -400,8 +400,9 @@ const main = {
      * Creates a new project.
      * @param {object} app - The application object that provides access to the app's functionality and
      * context.
+     * @param {string} currentProjectName - The name of the current project
      */
-    createProject: async function (app) {
+    createProject: async function (app, currentProjectName = "") {
       /**
        * @type {main}
        */
@@ -417,7 +418,8 @@ const main = {
         await self._projectMain.promptUserForProjectDetails.call(
           self,
           app,
-          clients
+          clients,
+          currentProjectName
         );
       if (!projectDetails) return;
       const createdProject = await self._entriesService.createProject.call(
@@ -432,9 +434,14 @@ const main = {
      * Prompts the user for project details.
      * @param {object} app - The application object that provides access.
      * @param {Array<object>} clients - workspace clients
+     * @param {string} currentProjectName - The name of the current project
      * @returns {Promise<ProjectDetails>} project data object.
      */
-    promptUserForProjectDetails: async function (app, clients) {
+    promptUserForProjectDetails: async function (
+      app,
+      clients,
+      currentProjectName
+    ) {
       const clientOptions = clients.map((client) => ({
         label: client.name,
         value: client.name,
@@ -444,6 +451,7 @@ const main = {
           {
             label: "Project Name",
             type: "text",
+            value: currentProjectName || "",
           },
           {
             label: "Client Name",
