@@ -185,17 +185,6 @@ const main = {
         app.alert(e);
       }
     },
-    "Create a client": async function (app) {
-      /**
-       * @type {main}
-       */
-      const self = this;
-      try {
-        await self._clientMain.createClient.call(self, app);
-      } catch (e) {
-        app.alert(e);
-      }
-    },
   },
   /** Start Time Feature */
   _startMain: {
@@ -657,33 +646,6 @@ const main = {
         self.constants.BASE_URI,
         workspaceId
       )}?${searchParams}`;
-      const res = await self._utils.sendRequest.call(self, uri, options);
-      return await res.json();
-    },
-    /**
-     * The function `createClient` is used to create a client.
-     * @param {number} workspaceId workspace id.
-     * @param {string} token - Toggl Track personal token.
-     * @param {string} clientName - Client data object.
-     * @returns the response from the `sendReq` function as a JSON object.
-     */
-    createClient: async function (token, workspaceId, clientName) {
-      /**
-       * @type {main}
-       */
-      const self = this;
-      const options = {
-        method: "POST",
-        body: JSON.stringify({
-          name: clientName,
-          wid: workspaceId,
-        }),
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Basic ${btoa(token + ":api_token")}`,
-        },
-      };
-      const uri = self.uris.clients(self.constants.BASE_URI, workspaceId);
       const res = await self._utils.sendRequest.call(self, uri, options);
       return await res.json();
     },
