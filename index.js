@@ -160,13 +160,14 @@ const main = {
         app.alert(e);
       }
     },
-    "Create a project": async function (app) {
+    "Create a project": async function (app, noteUUID) {
       /**
        * @type {main}
        */
       const self = this;
       try {
-        await self._projectMain.createProject.call(self, app);
+        const currentNote = await self._utils.findNote({ noteUUID });
+        await self._projectMain.createProject.call(self, app, currentNote.name);
       } catch (e) {
         app.alert(e);
       }
