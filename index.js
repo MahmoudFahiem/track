@@ -68,10 +68,8 @@ const main = {
          */
         const self = this;
         try {
-          const currentEntry = await self._stopMain.getCurrentEntryIfExists.call(
-            self,
-            app
-          );
+          const currentEntry =
+            await self._stopMain.getCurrentEntryIfExists.call(self, app);
           const task = await self._utils.getTask.call(
             self,
             app,
@@ -164,6 +162,25 @@ const main = {
       const self = this;
       try {
         await self._projectMain.createProject.call(self, app);
+      } catch (e) {
+        app.alert(e);
+      }
+    },
+    Stop: async function (app) {
+      /**
+       * @type {main}
+       */
+      const self = this;
+      try {
+        const currentEntry = await self._stopMain.getCurrentEntryIfExists.call(
+          self,
+          app
+        );
+        await self._stopMain.stopCurrentTimeEntry.call(
+          self,
+          app,
+          currentEntry,
+        );
       } catch (e) {
         app.alert(e);
       }
