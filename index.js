@@ -44,11 +44,13 @@ const main = {
           const note = await self._utils.findNote.call(self, app, {
             uuid: task.noteUUID,
           });
+          const tagsPrefix = self._utils.getTagsPrefix(app);
+          const filteredTags = self._utils.filterTags(note.tags, tagsPrefix);
           await self._startMain.startTimeEntry.call(
             self,
             app,
             formattedTask,
-            note.tags
+            filteredTags
           );
         } catch (e) {
           app.alert(e);
@@ -116,11 +118,13 @@ const main = {
         const note = await self._utils.findNote.call(self, app, {
           uuid: noteUUID,
         });
+        const tagsPrefix = self._utils.getTagsPrefix(app);
+        const filteredTags = self._utils.filterTags(note.tags, tagsPrefix);
         await self._startMain.startTimeEntry.call(
           self,
           app,
           note.name,
-          note.tags
+          filteredTags
         );
       } catch (e) {
         app.alert(e);
@@ -436,7 +440,7 @@ const main = {
     /**
      * Prompts the user for project details.
      * @param {object} app - The application object that provides access.
-     * @param {Array<object>} clients - workspace clients
+     * @param {object[]} clients - workspace clients
      * @param {string} currentProjectName - The name of the current project
      * @returns {Promise<ProjectDetails>} project data object.
      */
@@ -541,7 +545,7 @@ const main = {
       return await res.json();
     },
     /**
-     * The function `startTracking` is used to create a new time tracking entry with a given description
+     * The function `sendTrackingRequest` is used to create a new time tracking entry with a given description
      * and other constants.
      * @param {EntryDetails} entryDetails - entry details
      * @param {number} workspaceId - workspace id
@@ -738,6 +742,16 @@ const main = {
       return token;
     },
     /**
+     * Gets tags prefix from the plugin settings.
+     *
+     * @param {object} app - The application object that provides access to the app's functionality and
+     * context.
+     * @returns {string} The tag prefix.
+     */
+    getTagsPrefix: function (app) {
+      return app.settings["Tags Prefix"] || "";
+    },
+    /**
      * Gets workspace from the plugin settings.
      *
      * @param {object} app - The application object that provides access to the app's functionality and
@@ -764,6 +778,21 @@ const main = {
     splitStringOnComma: function (string) {
       if (!string) return [];
       return string.split(",").map((string) => string.trim());
+    },
+    /**
+     *
+     * @param {string[]} tags - tags
+     * @param {string} tagsPrefix - tags prefix
+     * @returns {Array<string>} - filtered tags
+     */
+    filterTags: function (tags, tagsPrefix) {
+      const filteredTags =
+        tags?.filter((tag) => tag.startsWith(tagsPrefix)) || [];
+      return (
+        filteredTags?.map((filteredTag) =>
+          filteredTag.replace(tagsPrefix, "")
+        ) || []
+      );
     },
   },
 };
