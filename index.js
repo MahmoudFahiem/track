@@ -68,13 +68,10 @@ const main = {
          */
         const self = this;
         try {
-          const currentEntry =
-            await self._entriesService.getCurrentTimeEntry.call(
-              self,
-              self._utils.getToken(app)
-            );
-          if (!currentEntry)
-            return app.alert("There is no running time entry.");
+          const currentEntry = await self._stopMain.getCurrentEntryIfExists.call(
+            self,
+            app
+          );
           const task = await self._utils.getTask.call(
             self,
             app,
@@ -84,22 +81,12 @@ const main = {
             self,
             task.content
           );
-          const isStopCurrent =
-            await self._stopMain.confirmStopRunningEntry.call(
-              self,
-              app,
-              currentEntry.description.trim(),
-              formattedTask
-            );
-          if (!isStopCurrent) return;
-          const stoppedEntry =
-            await self._entriesService.stopCurrentTimeEntry.call(
-              self,
-              currentEntry.id,
-              self._utils.getToken(app),
-              self._utils.getWorkspaceId(app)
-            );
-          app.alert(`"${stoppedEntry.description}" stopped successfully`);
+          await self._stopMain.stopCurrentTimeEntry.call(
+            self,
+            app,
+            currentEntry,
+            formattedTask
+          );
         } catch (e) {
           app.alert(e);
         }
@@ -136,30 +123,19 @@ const main = {
        */
       const self = this;
       try {
-        const currentEntry =
-          await self._entriesService.getCurrentTimeEntry.call(
-            self,
-            self._utils.getToken(app)
-          );
-        if (!currentEntry) return app.alert("There is no running time entry.");
+        const currentEntry = await self._stopMain.getCurrentEntryIfExists.call(
+          self,
+          app
+        );
         const currentNote = await self._utils.findNote.call(self, app, {
           uuid: noteUUID,
         });
-        const isStopCurrent = await self._stopMain.confirmStopRunningEntry.call(
+        await self._stopMain.stopCurrentTimeEntry.call(
           self,
           app,
-          currentEntry.description,
+          currentEntry,
           currentNote.name
         );
-        if (!isStopCurrent) return;
-        const stoppedEntry =
-          await self._entriesService.stopCurrentTimeEntry.call(
-            self,
-            currentEntry.id,
-            self._utils.getToken(app),
-            self._utils.getWorkspaceId(app)
-          );
-        app.alert(`"${stoppedEntry.description}" stopped successfully`);
       } catch (e) {
         app.alert(e);
       }
@@ -330,6 +306,34 @@ const main = {
   /** Stop Time Feature */
   _stopMain: {
     /**
+     * Stops the current time entry if exists
+     *
+     * @param {Object} app - The app.
+     * @param {object} currentEntry - The current time entry.
+     * @param {String} description - The note/task description.
+     * @returns
+     */
+    stopCurrentTimeEntry: async function (app, currentEntry, description) {
+      /**
+       * @type {main}
+       */
+      const self = this;
+      const isStopCurrent = await self._stopMain.confirmStopRunningEntry.call(
+        self,
+        app,
+        currentEntry.description.trim(),
+        description
+      );
+      if (!isStopCurrent) return;
+      const stoppedEntry = await self._entriesService.stopCurrentTimeEntry.call(
+        self,
+        currentEntry.id,
+        self._utils.getToken(app),
+        self._utils.getWorkspaceId(app)
+      );
+      app.alert(`"${stoppedEntry.description}" stopped successfully`);
+    },
+    /**
      * The function `confirmStopRunningEntry` checks if the current entry description matches the current
      * note name and prompts the user to confirm if they want to stop the running entry.
      *
@@ -357,6 +361,24 @@ const main = {
         }
       );
       return value;
+    },
+    /**
+     * Checks if there is a running entry and returns it.
+     *
+     * @param {object} app - The app object
+     * @returns return the current entry if exists
+     */
+    getCurrentEntryIfExists: async function (app) {
+      /**
+       * @type {main}
+       */
+      const self = this;
+      const currentEntry = await self._entriesService.getCurrentTimeEntry.call(
+        self,
+        self._utils.getToken(app)
+      );
+      if (!currentEntry) return app.alert("There is no running time entry.");
+      return currentEntry;
     },
   },
   _clientMain: {
