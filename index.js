@@ -50,7 +50,8 @@ const main = {
             self,
             app,
             formattedTask,
-            filteredTags
+            filteredTags,
+            note.name
           );
         } catch (e) {
           app.alert(e);
@@ -176,11 +177,7 @@ const main = {
           self,
           app
         );
-        await self._stopMain.stopCurrentTimeEntry.call(
-          self,
-          app,
-          currentEntry,
-        );
+        await self._stopMain.stopCurrentTimeEntry.call(self, app, currentEntry);
       } catch (e) {
         app.alert(e);
       }
@@ -196,9 +193,15 @@ const main = {
      * context.
      * @param {string} entryDescription - The entry description.
      * @param {Nullable<Array<string>>} noteTags - note tags
+     * @param {string} defaultProjectName = The entry default project name.
      * @returns {Promise<void>}
      */
-    startTimeEntry: async function (app, entryDescription, noteTags) {
+    startTimeEntry: async function (
+      app,
+      entryDescription,
+      noteTags,
+      defaultProjectName = ""
+    ) {
       /**
        * @type {main}
        */
@@ -229,7 +232,8 @@ const main = {
         app,
         projects,
         entryDescription,
-        noteTags || []
+        noteTags || [],
+        defaultProjectName
       );
       if (!entryDetails) return;
       const entry = await self._entriesService.sendTrackingRequest.call(
@@ -268,15 +272,17 @@ const main = {
      * @param {object} app - The application object that provides access to the app's functionality and
      * context.
      * @param {Array<object>} projects - Workspace projects
-     * @param {string} description - Entry description
-     * @param {Array<string>} tags - Entry tags
+     * @param {string} description - Entry description.
+     * @param {Array<string>} tags - Entry tags.
+     * @param {string} defaultProjectName = The entry default project name.
      * @returns {Promise<EntryDetails>} User values
      */
     promptUserForEntryDetails: async function (
       app,
       projects,
       description,
-      tags
+      tags,
+      defaultProjectName
     ) {
       /**
        * @type {main}
@@ -286,6 +292,9 @@ const main = {
         label: project.name,
         value: project.id,
       }));
+      const defaultProject = projects.find(
+        (project) => project.name === defaultProjectName
+      );
       const formValues = await app.prompt(`Choose Entry Details:`, {
         inputs: [
           {
@@ -296,6 +305,7 @@ const main = {
           {
             label: "Project",
             type: "select",
+            value: defaultProject.id,
             options: projectsOptions,
           },
           {
