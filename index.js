@@ -320,11 +320,10 @@ const main = {
         ],
       });
       if (!formValues) return;
-      const projectId = parseInt(formValues[1]);
-      if (isNaN(projectId)) throw new TypeError("Invalid project id number");
+      const projectId = parseInt(formValues[1]) || null;
       return {
         description: formValues[0],
-        projectId: projectId,
+        projectId,
         isBillable: formValues[2],
         tags: self._utils.splitStringOnComma.call(self, formValues[3]),
       };
