@@ -24,7 +24,7 @@ const main = {
   insertText: {
     Start: {
       async check(app) {
-        return app.context.taskUUID;
+        return !!app.context.taskUUID;
       },
       async run(app) {
         /**
@@ -61,7 +61,7 @@ const main = {
     },
     Stop: {
       async check(app) {
-        return app.context.taskUUID;
+        return !!app.context.taskUUID;
       },
       async run(app) {
         /**
