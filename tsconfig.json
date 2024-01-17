@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "module": "ESNext" /* Specify what module code is generated. */,
+    "strict": true,
+    "outDir": "./dist" /* Specify an output folder for all emitted files. */,
+    "removeComments": true /* Disable emitting comments. */,
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}

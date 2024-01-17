@@ -3,8 +3,11 @@
   "version": "1.0.0",
   "description": "An unofficial Amplenote plugin that integrates with Toggl track",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "start": "nodemon index.js"
+    "parse": "node parser/parser.js",
+    "build": "esbuild src/index.ts --bundle --outfile=dist/bundle.js --target=chrome58,firefox57,safari11,edge16",
+    "formatBundle": "node scripts/formatBundle.js"
   },
   "repository": {
     "type": "git",
@@ -20,6 +23,15 @@
   },
   "homepage": "https://github.com/MahmoudFahiem/track#readme",
   "dependencies": {
-    "nodemon": "^3.0.1"
+    "acorn": "^8.11.2",
+    "clipboardy": "^4.0.0",
+    "escodegen": "^2.1.0",
+    "typescript": "^5.3.2"
+  },
+  "devDependencies": {
+    "@tsconfig/node20": "^20.1.2",
+    "esbuild": "0.19.8",
+    "nodemon": "^3.0.2",
+    "ts-node": "^10.9.2"
   }
 }
