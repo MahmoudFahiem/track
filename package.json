@@ -17,21 +17,15 @@
     "Amplenote"
   ],
   "author": "Mahmoud Fahiem",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/MahmoudFahiem/track/issues"
   },
   "homepage": "https://github.com/MahmoudFahiem/track#readme",
-  "dependencies": {
-    "acorn": "^8.11.2",
-    "clipboardy": "^4.0.0",
-    "escodegen": "^2.1.0",
-    "typescript": "^5.3.2"
-  },
   "devDependencies": {
-    "@tsconfig/node20": "^20.1.2",
+    "clipboardy": "^4.0.0",
     "esbuild": "0.19.8",
-    "nodemon": "^3.0.2",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
   }
 }
